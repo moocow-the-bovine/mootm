@@ -147,7 +147,7 @@ FSM *mootMorph::load_fsm_file(const char *filename, FSM **fsm, bool *i_made_fsm)
  * Top-level tagging methods
  *--------------------------------------------------------------------------*/
 
-bool mootMorph::tag_churn(TokenReader *reader, TokenWriter *writer)
+bool mootMorph::tag_io(TokenReader *reader, TokenWriter *writer)
 {
   // -- sanity check
   if (!can_tag()) {
@@ -157,23 +157,24 @@ bool mootMorph::tag_churn(TokenReader *reader, TokenWriter *writer)
 
   // -- do analysis
   int rtok;
-  while (reader && (rtok = reader->get_sentence()) != TF_EOF) {
-    mootSentence &sent = reader->sentence();
+  while (reader && (rtok = reader->get_sentence()) != TokTypeEOF) {
+    mootSentence *sent = reader->sentence();
+    if (!sent) break;
 
-    for (mootSentence::iterator si = sent.begin(); si != sent.end(); si++) {
-      if (si->flavor() == TF_COMMENT) continue; //-- don't analyze comments
+    for (mootSentence::iterator si = sent->begin(); si != sent->end(); si++) {
+      if (si->toktype() != TokTypeVanilla) continue; //-- only analyze vanilla toks
       if (force_reanalysis || si->analyses().empty()) analyze_token(*si);
       ntokens++;
       if (nprogress && ntokens % nprogress == 0) fputc('.',stderr);
     }
-    if (writer) writer->put_sentence(sent);
+    if (writer) writer->put_sentence(*sent);
   }
   if (nprogress) fputc('\n',stderr);
 
   return true;
 }
 
-bool mootMorph::tag_strings(int argc, char **argv, FILE *out, char *srcname)
+bool mootMorph::tag_strings(int argc, char **argv, FILE *out, const char *srcname)
 {
   // -- sanity check
   if (!can_tag()) {
@@ -183,7 +184,8 @@ bool mootMorph::tag_strings(int argc, char **argv, FILE *out, char *srcname)
 
   // -- ye olde guttes
   mootSentence sent;
-  TokenWriterCookedFile twriter(false,out);
+  TokenWriterNative twriter(tiofMediumRare);
+  twriter.to_file(out);
   mootToken tok;
   for ( ; --argc >= 0; argv++) {
     tok.clear();

@@ -119,7 +119,7 @@ these sources.
 
 =head1 KNOWN BUGS
 
-None known.
+Looks like there is a memory leak somewhere...
 
 =begin comment text
 

@@ -287,20 +287,25 @@ public:
 
   /** \name Tagging: Top-level */
   //@{
-  /** Top-level: tag tokens from a C-stream, using a mootTaggerLexer */
-  bool tag_churn(TokenReader *reader, TokenWriter *writer);
+  /** Top-level: tag tokens from a C-stream */
+  bool tag_io(TokenReader *reader, TokenWriter *writer);
 
-  /** Top-level: tag tokens from a C-stream, using a mootTaggerLexer */
-  bool tag_stream(FILE *in=stdin, FILE *out=stdout, char *srcname=NULL)
+  /** Top-level: tag tokens from a C-stream */
+  bool tag_stream(FILE *in=stdin, FILE *out=stdout, const char *srcname=NULL)
   {
-    TokenReaderCookedFile tr(first_analysis_is_best, in, srcname);
-    TokenWriterCookedFile tw(false, out);
-    tr.lexer.ignore_first_analysis = ignore_first_analysis;
-    return tag_churn(&tr,&tw);
+    int ifmt = ignore_first_analysis  ? tiofWellDone : tiofMediumRare;
+    int ofmt = first_analysis_is_best ? tiofWellDone : tiofMediumRare;
+    //tr.lexer.ignore_first_analysis = ignore_first_analysis;
+    TokenReaderNative tr(ifmt);
+    TokenWriterNative tw(ofmt);
+    tr.from_file(in);
+    tw.to_file(out);
+    if (srcname) tr.reader_name(srcname);
+    return tag_io(&tr,&tw);
   };
 
   /** Top-level: tag a C-array of token-strings */
-  bool tag_strings(int argc, char **argv, FILE *out=stdout, char *srcname=NULL);
+  bool tag_strings(int argc, char **argv, FILE *out=stdout, const char *srcname=NULL);
   //@}
 
   /*------------------------------------------------------------
@@ -397,11 +402,13 @@ public:
 	symbol_vector_to_string(anlsi->istr, analysis.tag);
       }
 
-#if FSM_API_REVISION == 0
+#if 0
+# if FSM_API_REVISION == 0
       analysis.cost = anlsi->weight;
-#else // FSM_API_REVISION != 0
+# else // FSM_API_REVISION != 0
       analysis.cost = anlsi->weight.weight();
-#endif // FSM_API_REVISION
+# endif // FSM_API_REVISION
+#endif
       tok.insert(analysis);
     }
   };
@@ -471,11 +478,13 @@ public:
       }
 
       //-- copy weight as 'cost'
-#if FSM_API_REVISION == 0
+#if 0
+# if FSM_API_REVISION == 0
       toka.cost = anlsi->weight;
-#else // FSM_API_REVISION != 0
+# else // FSM_API_REVISION != 0
       toka.cost = anlsi->weight.weight();
-#endif // FSM_API_REVISION
+# endif // FSM_API_REVISION
+#endif
 
       //-- insert analysis
       tok->insert(toka);

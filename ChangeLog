@@ -1,5 +1,8 @@
 ChangeLog for package mootm
 
+2.0.2 Fri, 09 Jul 2004 01:02:30 +0200
+	+ changed to jive with moot 2.0.0 API
+	
 2.0.1 Thu, 10 Jun 2004 20:17:07 +0200
 	+ added support for fsmlib 0.1.x
 	  - tested version calls itself 0.1.1.1, which it
