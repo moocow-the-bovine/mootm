@@ -13,10 +13,14 @@ on_reparse "warn"
 # Details
 #-----------------------------------------------------------------------------
 details "
-'dwdsm' is a morphological analyzer
+'mootm' is a morphological analyzer
 program based on the 'libmoot' library, using Thomas
 Hanneforth's FSM library for representation and manipulation
 of the underlying finite-state machines.
+
+It takes as its input one or more 'rare' or 'medium' (+/-tagged,-analyzed)
+text files, and outputs 'medium rare' or 'well done' (+analzed) text files,
+respectively.  See mootfiles(5) for details on moot file formats.
 "
 
 #-----------------------------------------------------------------------------
@@ -143,10 +147,12 @@ If unspecified, the morphological transducer is itself expected to
 output PoS tags.
 
 Warning: use of a tag-extraction FST slows down analysis time
-immensely.  This is in part due to a bug in the C++ FSM library.
-It should nonetheless work correctly, due to heroic efforts on
-the part of the author of this program.
+immensely.
 "
+
+#This is in part due to a bug in the C++ FSM library.
+#It should nonetheless work correctly, due to heroic efforts on
+#the part of the author of this program.
 
 #-----------------------------------------------------------------------------
 # Addenda
@@ -167,4 +173,4 @@ Quite slow in the general case.
 #-----------------------------------------------------------------------------
 acknowledge `cat acknowledge.pod`
 
-seealso "mootpp(1), moothmm(1), moot(1)"
+seealso "mootpp(1), moot(1), mootfiles(5)"
