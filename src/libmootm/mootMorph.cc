@@ -147,31 +147,27 @@ FSM *mootMorph::load_fsm_file(const char *filename, FSM **fsm, bool *i_made_fsm)
  * Top-level tagging methods
  *--------------------------------------------------------------------------*/
 
-bool mootMorph::tag_stream(FILE *in, FILE *out, char *srcname)
+bool mootMorph::tag_churn(TokenReader *reader, TokenWriter *writer)
 {
-  TokenReader treader(first_analysis_is_best,ignore_first_analysis);
-  TokenWriter twriter;
-  treader.select_stream(in, srcname);
-
   // -- sanity check
   if (!can_tag()) {
-    carp("mootMorph::tag_stream(): cannot run uninitialized morphology!\n");
+    carp("mootMorph::tag_churn(): cannot run uninitialized morphology!\n");
     return false;
   }
 
   // -- do analysis
-  do {
-    mootSentence &sent = treader.get_sentence();
-    if (treader.lexer.lasttyp == TF_EOF) break;
+  int rtok;
+  while (reader && (rtok = reader->get_sentence()) != TF_EOF) {
+    mootSentence &sent = reader->sentence();
 
     for (mootSentence::iterator si = sent.begin(); si != sent.end(); si++) {
-      if (si->flavor() == TF_COMMENT) continue; //-- ignore comments
+      if (si->flavor() == TF_COMMENT) continue; //-- don't analyze comments
       if (force_reanalysis || si->analyses().empty()) analyze_token(*si);
       ntokens++;
       if (nprogress && ntokens % nprogress == 0) fputc('.',stderr);
     }
-    twriter.sentence_put(out,sent);
-  } while (1);
+    if (writer) writer->put_sentence(sent);
+  }
   if (nprogress) fputc('\n',stderr);
 
   return true;
@@ -187,7 +183,7 @@ bool mootMorph::tag_strings(int argc, char **argv, FILE *out, char *srcname)
 
   // -- ye olde guttes
   mootSentence sent;
-  TokenWriter twriter;
+  TokenWriterCookedFile twriter(false,out);
   mootToken tok;
   for ( ; --argc >= 0; argv++) {
     tok.clear();
@@ -229,7 +225,7 @@ bool mootMorph::tag_strings(int argc, char **argv, FILE *out, char *srcname)
   }
   */
 
-  twriter.sentence_put(out, sent);
+  twriter.put_sentence(sent);
 
   sent.clear();
   return true;

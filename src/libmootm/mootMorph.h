@@ -288,7 +288,16 @@ public:
   /** \name Tagging: Top-level */
   //@{
   /** Top-level: tag tokens from a C-stream, using a mootTaggerLexer */
-  bool tag_stream(FILE *in=stdin, FILE *out=stdout, char *srcname=NULL);
+  bool tag_churn(TokenReader *reader, TokenWriter *writer);
+
+  /** Top-level: tag tokens from a C-stream, using a mootTaggerLexer */
+  bool tag_stream(FILE *in=stdin, FILE *out=stdout, char *srcname=NULL)
+  {
+    TokenReaderCookedFile tr(first_analysis_is_best, in, srcname);
+    TokenWriterCookedFile tw(false, out);
+    tr.lexer.ignore_first_analysis = ignore_first_analysis;
+    return tag_churn(&tr,&tw);
+  };
 
   /** Top-level: tag a C-array of token-strings */
   bool tag_strings(int argc, char **argv, FILE *out=stdout, char *srcname=NULL);

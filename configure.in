@@ -142,7 +142,7 @@ dnl libFSM
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 # ------------------------------------------------------------
-# libFSMext (via pkg-config)
+# FSM_API_REVISION
 case "$ac_cv_fsm_version" in
   0.1.0.*)
     AC_MSG_NOTICE([Configuring for elderly FSM version 0.1.0.*])
@@ -158,7 +158,7 @@ case "$ac_cv_fsm_version" in
     FSM_API_REVISION=-1
     ;;
 esac
-dnl libFSMext
+dnl /FSM_API_REVISION
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 dnl ------------------------------------------------------------
@@ -394,15 +394,16 @@ if test "$mootm_doc_formats" != "none" ; then
 
 
   # -- check for tag-files (this needs an overhaul!)
-  for ext in FSM FSMext moot ; do
-    extdocdir="`$PKG_CONFIG --variable=pkgdocdir lib${ext}`"
+  for ext in moot libFSM ; do
+    extdocdir="`$PKG_CONFIG --variable=pkgdocdir ${ext}`"
     if test -n "$extdocdir" -a "$extdocdir" != "no" ; then
-      if test \
-	-d "$extdocdir/$ext" \
-	-a \
-	-e "$extdocdir/$ext/$ext.tag" -a -d "$extdocdir/$ext/html"
-      then DOXY_TAGFILES="$DOXY_TAGFILES $extdocdir/$ext/$ext.tag=$extdocdir/$ext/html"
-      fi
+      exttagfiles="`find $extdocdir -name '*.tag'`"
+      for exttag in $exttagfiles ; do
+        exttagdir="`dirname $exttag`/html"
+        if test -d "$exttagdir" ; then
+          DOXY_TAGFILES="$DOXY_TAGFILES $exttag=$exttagdir"
+        fi
+      done
     fi
   done 
   AC_SUBST(DOXY_TAGFILES)   
