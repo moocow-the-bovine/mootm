@@ -1,0 +1,159 @@
+=pod
+
+README for package 'mootm'
+
+Last updated for mootmorph version 0.0.1
+
+=head1 DESCRIPTION
+
+mootm - moocow's part-of-speech tagger: morphology.
+
+=head1 REQUIREMENTS
+
+=over 4
+
+=item STLport E<gt>= 4.5.3
+
+Available from http://www.stlport.org
+
+Only required for building with gcc-2.x.
+
+
+=item pkg-config
+
+Available from:
+http://www.freedesktop.org/software/pkgconfig/
+
+
+
+=item flex++ , bison++
+
+Alain Coetmeur's C++ ports of the famous lexer/parser
+generator pair, available from:
+ftp://iecc.com/pub/file/bison++flex++
+or
+from the official distribution site of this package.
+
+Tested with flex++-v2.3.8-4 and bison++-v1.21-5.
+
+
+=begin comment text
+
+=item libbumble E<gt>= 1.13.5
+
+Origninal sources available from
+http://www.bumblebeesoftware.com
+
+You will need a pkg-config metafile (libbumble.pc)
+for this requirement
+in your PKG_CONFIG_PATH in order to compile this
+package -- you can make one yourself, or you can
+get one from the official distribution site of
+this package.
+
+=end comment text
+
+
+=item libFSM E<gt>= v0.1.0.6
+
+Currently available only from its original author,
+Thomas Hanneforth E<lt>tom@ling.uni-potsdam.deE<gt>.
+
+You will need a pkg-config metafile (libFSM.pc)
+for this requirement
+in your PKG_CONFIG_PATH in order to compile this
+package -- you can make one yourself, or you can
+get one from the author of this package.
+
+=begin comment text
+
+the official distribution site of this package.
+
+=end comment text
+
+
+=item libFSMext E<gt>= v0.0.2
+
+Only needed for libFSM <= v0.1.1.1.
+Should be available wherever you got this package.
+
+You will need a pkg-config metafile (libFSMext.pc)
+for this requirement
+in your PKG_CONFIG_PATH in order to compile this
+package -- you can make one yourself, or you can
+get one from
+the official distribution site of this package.
+
+=back
+
+
+
+=head1 INSTALLATION
+
+Issue the following commands to the shell:
+
+ sh ./configure
+ make
+ make install
+
+See the file INSTALL in the top-level distribution
+directory for details.
+
+=head1 BUILD FROM CVS
+
+To build from CVS, you need the GNU utilities
+aclocal, automake, autoconf, and libtool.  If
+you have these, you can just run the top-level
+script:
+
+ sh ./autogen.sh
+
+This will create the 'configure' script and other
+necessary build files.
+
+You will also need the Getopt::Gen perl module,
+which should be available from wherever you acquired
+these sources.
+
+
+=head1 KNOWN BUGS
+
+This package is obsolete and deprecated.
+Potential users are strongly encouraged to switch to
+(? what it called and where should I point to ?)
+
+
+=head1 ACKNOWLEDGEMENTS
+
+Development of this package was supported by the project
+'Kollokationen im Wörterbuch'
+("collocations in the dictionary", http://www.bbaw.de/forschung/kollokationen )
+in association with the project
+'Digitales Wörterbuch der deutschen Sprache des 20. Jahrhunderts (DWDS)'
+("digital dictionary of the German language of the 20th century", http://www.dwds.de )
+at the Berlin-Brandenburgische Akademie der Wissenschaften ( http://www.bbaw.de )
+with funding from
+the Alexander von Humboldt Stiftung ( http://www.avh.de )
+and from the Zukunftsinvestitionsprogramm of the
+German federal government.
+
+I am grateful to Christiane Fellbaum, Alexander Geyken,
+Thomas Hanneforth, Gerald Neumann, Edmund Pohl, Alexey Sokirko,
+and others for offering useful insights in the course of development
+of this package.
+
+Thomas Hanneforth wrote and maintains the libFSM C++ library
+for finite-state device operations used by the
+class-based HMM tagger / disambiguator, without which this
+package could not have been built.
+
+Alexander Geyken and Thomas Hanneforth developed the
+rule-based morphological analysis system for German
+which was used in the development and testing of the
+class-based HMM tagger / disambiguator.
+
+=head1 AUTHOR
+
+Bryan Jurish E<lt>moocow@ling.uni-potsdam.deE<gt>
+
+=cut

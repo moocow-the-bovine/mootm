@@ -1,0 +1,10 @@
+mootm (0.0.1) unstable; urgency=low
+
+  * extracted morphology / FSM dependencies from 'moot' package
+
+ -- Bryan Jurish <moocow@ling.uni-potsdam.de>  Fri, 21 May 2004 13:43:39 +0200
+
+
+Local variables:
+mode: change-log
+End:
