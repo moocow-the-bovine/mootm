@@ -35,7 +35,6 @@ pkgdoc_DATA = \
 	$(PODS:.pod=.txt) \
 	AUTHORS \
 	COPYING \
-	INSTALL \
 	ChangeLog
 
 #-----------------------------------------------------------------------
@@ -135,6 +134,40 @@ nobindist:
 	rm -f $(PACKAGE)-*-*-$(BINDIST_CPU)-$(BINDIST_OS).tar.gz
 
 #-----------------------------------------------------------------------
+# Rules: binary package: static .tar.gz
+#-----------------------------------------------------------------------
+BINDIST_STATIC = $(BINDIST_NATIVE)-static
+
+static: $(BINDIST_STATIC).tar.gz
+
+$(BINDIST_STATIC).tar.gz: distdir
+	mv $(distdir) $(BINDIST_STATIC)
+	( cd $(BINDIST_STATIC) \
+	  && ./configure --disable-shared --enable-all-static \
+	     CXXFLAGS="-mcpu=$(BINDIST_CPU)" \
+	  && $(MAKE) all \
+	  && mkdir $(BINDIST_STATIC) \
+	  && $(MAKE) prefix="`pwd`/$(BINDIST_STATIC)" install \
+	  && fakeroot $(AMTAR) cof - $(BINDIST_STATIC) | GZIP=$(GZIP_ENV) gzip -c >../$@ \
+	) && \
+	rm -rf $(BINDIST_STATIC)
+
+$(BINDIST_STATIC)-___OLD___.tar.gz: distdir
+	mv $(distdir) $(BINDIST_STATIC)
+	( cd $(BINDIST_STATIC) \
+	  && ./configure --disable-shared \
+	     CXXFLAGS="-mcpu=$(BINDIST_CPU)" \
+	  && $(MAKE) all LDFLAGS="-all-static" \
+	  && mkdir $(BINDIST_STATIC) \
+	  && $(MAKE) prefix="`pwd`/$(BINDIST_STATIC)" install \
+	  && fakeroot $(AMTAR) cof - $(BINDIST_STATIC) | GZIP=$(GZIP_ENV) gzip -c >../$@ \
+	) && \
+	rm -rf $(BINDIST_STATIC)
+
+nostatic:
+	rm -rf $(PACKAGE)-*-*-$(BINDIST_CPU)-$(BINDIST_OS)-static*
+
+#-----------------------------------------------------------------------
 # Rules: binary package: rpm
 #-----------------------------------------------------------------------
 
@@ -218,6 +251,7 @@ MAINTAINERCLEANFILES = *~ \
 
 ## --- extra distribution files
 EXTRA_DIST = \
+	INSTALL \
 	$(PODS:.pod=.txt) \
 	$(DEBIAN_FILES) \
 	autogen.sh\

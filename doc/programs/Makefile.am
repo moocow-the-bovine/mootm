@@ -58,7 +58,6 @@ pdf: $(mootm_program_gogs:.gog=.pdf)
 .SECONDARY:
 
 OPTGENFLAGS = -l
-
 .gog.pod:
 	optgen.perl $(OPTGENFLAGS) --nocfile --nohfile -F $* $<
 
@@ -66,7 +65,9 @@ OPTGENFLAGS = -l
 ## pod conversion rules
 ##-----------------------------------------------------------------------
 
-POD2MANFLAGS = --center="moocow's PoS Tagging Tools"
+POD2MANFLAGS = \
+	--center="moocow's Morphology Tools" \
+	--release="mootm v$(VERSION)"
 POD2HTMLFLAGS = --podpath="$(srcdir):." --htmlroot="."
 
 .pod.1:
@@ -104,11 +105,13 @@ POD2HTMLFLAGS = --podpath="$(srcdir):." --htmlroot="."
 
 ## --- clean:  built by 'make'
 CLEANFILES = \
-	*.pod *.man *.1 *.html *.txt *.tex *.dvi *.ps *.pdf \
-	*.log *.aux *.toc *.idx *~~
+	$(filter-out acknowledge.pod,$(wildcard *.pod)) \
+	*.man *.1 *.html *.txt *.tex *.dvi *.ps *.pdf \
+	*.log *.aux *.toc *.idx *.tmp *~~
 
 ## --- distclean: built by 'configure'
-DISTCLEANFILES = *.gog
+DISTCLEANFILES = \
+	*.pod *.gog
 
 ## -- maintainerclean: built by maintainer / by hand
 MAINTAINERCLEANFILES = \
