@@ -18,7 +18,7 @@
 */
 
 /* just include the config.h for libmootm */
-#include <moomtConfig.h>
+#include <mootmConfig.h>
 
 /* PACKAGE does not jive well with multiple-program pacakges
    using 'gengetopt'.  'autoheader' doesn't like to undefine
