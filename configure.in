@@ -136,7 +136,24 @@ CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I libFSM`"
 LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L libFSM`"
 FSM_LIBS="`$PKG_CONFIG --libs-only-l libFSM` $LIBS"
 
+
+##-- HACK: double-link libFSM as workaround
+##   for libFSM<->libFSMTools interdependence
+##   and libtool hardcore modularity requirement
+AC_ARG_ENABLE(all-static,
+	AC_HELP_STRING([--enable-all-static],
+	               [Build standalone static binary]),
+	[ac_cv_enable_all_static="$enableval"],[ac_cv_enable_all_static="no"])
+
+#FSM_LIBS="$FSM_LIBS -lFSM"
+if test "$ac_cv_enable_all_static" = "yes" ; then
+   FSM_LDADD_STATIC="-lFSMStaticHack"
+   LDFLAGS="-all-static $LDFLAGS"
+fi
+
 AC_SUBST(FSM_LIBS)
+AC_SUBST(FSM_LDADD_STATIC)
+
 
 dnl libFSM
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

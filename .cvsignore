@@ -13,6 +13,8 @@ mootm.spec
 *.changes
 *.dsc
 *.rpm
+*-static.*
+*-static
 rpm
 .libs
 .deps

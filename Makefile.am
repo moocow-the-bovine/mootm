@@ -139,7 +139,20 @@ nobindist:
 BINDIST_STATIC = $(BINDIST_NATIVE)-static
 
 static: $(BINDIST_STATIC).tar.gz
+
 $(BINDIST_STATIC).tar.gz: distdir
+	mv $(distdir) $(BINDIST_STATIC)
+	( cd $(BINDIST_STATIC) \
+	  && ./configure --disable-shared --enable-all-static \
+	     CXXFLAGS="-mcpu=$(BINDIST_CPU)" \
+	  && $(MAKE) all \
+	  && mkdir $(BINDIST_STATIC) \
+	  && $(MAKE) prefix="`pwd`/$(BINDIST_STATIC)" install \
+	  && fakeroot $(AMTAR) cof - $(BINDIST_STATIC) | GZIP=$(GZIP_ENV) gzip -c >../$@ \
+	) && \
+	rm -rf $(BINDIST_STATIC)
+
+$(BINDIST_STATIC)-___OLD___.tar.gz: distdir
 	mv $(distdir) $(BINDIST_STATIC)
 	( cd $(BINDIST_STATIC) \
 	  && ./configure --disable-shared \

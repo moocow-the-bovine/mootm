@@ -133,7 +133,7 @@ LDFLAGS_COMMON = -L../libmootm
 #LDADD_COMMON   = -lmootm -lFSMExt @FSM_LIBS@
 #LDADD_COMMON   = -lmootm -lFSMExt -lFSM -lFSMSymSpec -lbumble++ @STL_LIBS@ -lz
 
-LDADD_COMMON   = ../libmootm/libmootm.la
+LDADD_COMMON   = ../libmootm/libmootm.la $(FSM_LIBS) $(FSM_LDADD_STATIC)
 
 mootm_LDFLAGS = $(LDFLAGS_COMMON)
 mootm_LDADD = $(LDADD_COMMON)

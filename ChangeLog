@@ -2,6 +2,20 @@ ChangeLog for package mootm
 
 2.0.2 Fri, 09 Jul 2004 01:02:30 +0200
 	+ changed to jive with moot 2.0.0 API
+	+ added 'static' build target
+	  - major hack required for libFSM<->libFSMTools interdependence
+	    * must double-link libFSM:
+	         ld ... -lFSM .. -lFSMTools ... -lFSM ...
+	    * Problem: libtool is too smart for poorly (im(ns)ho)
+	      designed libraries: it assumes truly modular libraries,
+	      mangling the above call into:
+	         ld ... -lFSMTools -lFSM ...
+	    * Hack:
+	      ~ added symlink in /usr/local/lib :
+		 libFSMStaticHack.a->libFSM.a
+	      ~ added configure argument '--enable-all-static'
+	        to handle the logic, so we end up calling:
+	         ld ... -lFSM ... -lFSMTools ... -lFSMStaticHack ...
 	
 2.0.1 Thu, 10 Jun 2004 20:17:07 +0200
 	+ added support for fsmlib 0.1.x
