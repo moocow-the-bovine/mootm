@@ -17,11 +17,9 @@ for offering useful insights in the course of development
 of this package.
 
 Thomas Hanneforth wrote and maintains the libFSM C++ library
-for finite-state device operations used by the
-class-based HMM tagger / disambiguator, without which
-this package could not have been built.
+for finite-state device operations used by this package.
 
 Alexander Geyken and Thomas Hanneforth developed the
 rule-based morphological analysis system for German
-which was used in the development and testing of the
-class-based HMM tagger / disambiguator.
+which was used in the development and testing of this
+package.
