@@ -1,9 +1,9 @@
 html
 latex
 man
-libmoot.doxy
-libmoot.log
-libmoot.tag
+libmootm.doxy
+libmootm.log
+libmootm.tag
 doxy-filter.log
 *.stamp
 *~
