@@ -441,10 +441,10 @@ public:
    * This method should just be a pair of libFSM calls,
    * but since they don't work (HINT), it's big and slow...
    * Complaints to [EXPUNGED].
-   * This bug has been fixed in newer versions libFSM.
+   * This bug reportedly has been fixed in newer versions libFSM.
    *
    * @param morph_w Token-Analysis result FSM.
-   * @param pos_w PoS-analyses to generate (clear it first)
+   * @param pos_w PoS-analyses to generate (clear it first yourself)
    * @return pos_w
    */
   MorphAnalysisSet &extract_tags(FSM &morph_w, MorphAnalysisSet &pos_w)

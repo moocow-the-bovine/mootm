@@ -207,7 +207,7 @@ dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 dnl vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 dnl libmoot
-PKG_CHECK_MODULES(MOOT, moot >= 2.0.0,
+PKG_CHECK_MODULES(MOOT, moot >= 2.0.0pre6,
 	[PC_HAVE_MOOT="yes"],
 	[PC_HAVE_MOOT=""])
   
