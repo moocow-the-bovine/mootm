@@ -58,7 +58,6 @@ pdf: $(mootm_program_gogs:.gog=.pdf)
 .SECONDARY:
 
 OPTGENFLAGS = -l
-
 .gog.pod:
 	optgen.perl $(OPTGENFLAGS) --nocfile --nohfile -F $* $<
 
@@ -66,7 +65,9 @@ OPTGENFLAGS = -l
 ## pod conversion rules
 ##-----------------------------------------------------------------------
 
-POD2MANFLAGS = --center="moocow's PoS Tagging Tools"
+POD2MANFLAGS = \
+	--center="moocow's Morphology Tools" \
+	--release="mootm v$(VERSION)"
 POD2HTMLFLAGS = --podpath="$(srcdir):." --htmlroot="."
 
 .pod.1:

@@ -132,54 +132,32 @@ else
     ac_cv_fsm_version=`pkg-config --modversion libFSM`
 fi ## test -z "$PC_HAVE_FSMLIB"
 
-dnl AC_SUBST(FSM_LIBS)
+CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I libFSM`"
+LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L libFSM`"
+FSM_LIBS="`$PKG_CONFIG --libs-only-l libFSM` $LIBS"
+
+AC_SUBST(FSM_LIBS)
 
 dnl libFSM
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 # ------------------------------------------------------------
 # libFSMext (via pkg-config)
-
 case "$ac_cv_fsm_version" in
   0.1.0.*)
     AC_MSG_NOTICE([Configuring for elderly FSM version 0.1.0.*])
-    PKG_CHECK_MODULES(FSMEXT, libFSMext >= 0.0.1,
-	[PC_HAVE_LIBFSMEXT=1],
-	[PC_HAVE_LIBFSMEXT=""])
-    if test -n "$PC_HAVE_LIBFSMEXT" ; then
-       CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I libFSMext`"
-       LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L libFSMext`"
-       FSMEXT_LIBS="`$PKG_CONFIG --libs-only-l libFSMext`"
-    else
-       AC_MSG_WARN()
-       AC_MSG_WARN([cannot find libFSMext >= 0.0.1!])
-       AC_MSG_WARN([is your PKG_CONFIG_PATH set correctly?])
-       AC_MSG_WARN()
-       AC_MSG_ERROR([Required package not found -- aborting.])
-    fi
     FSM_API_REVISION=0
     ;;
 
   0.1.1.*)
-    dnl AC_MSG_WARN([])
-    dnl AC_MSG_WARN([])
-    dnl AC_MSG_WARN([FSM >= 0.1.1.* not supported!])
-    dnl AC_MSG_WARN([])
-    dnl AC_MSG_WARN([])
-    dnl AC_MSG_ERROR([Your system is too new.  Get MorphConsole.])
-    ##--
-    CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I libFSM`"
-    LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L libFSM`"
-    FSMEXT_LIBS="`$PKG_CONFIG --libs-only-l libFSM`"
     FSM_API_REVISION=1
     ;;
 
   *)
-     ##-- default to API 1
-     FSM_API_REVISION=-1
-     ;;
+    ##-- default to API 1
+    FSM_API_REVISION=-1
+    ;;
 esac
-AC_SUBST(FSMEXT_LIBS)
 dnl libFSMext
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -195,7 +173,7 @@ dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 dnl vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 dnl libmoot
-PKG_CHECK_MODULES(MOOT, moot >= 2.0.0pre6,
+PKG_CHECK_MODULES(MOOT, moot >= 2.0.0pre7,
 	[PC_HAVE_MOOT="yes"],
 	[PC_HAVE_MOOT=""])
   
