@@ -42,8 +42,12 @@
 # include <FSMTypes.h>
 # include <FSM.h>
 # include <FSMSymSpec.h>
+#if FSM_API_REVISION == 0
 # include <FSMCost.h>
 # include <FSMRegexCompiler.h>
+#else /* FSM_API_REVISION != 0 */
+# include <FSMWeight.h>
+#endif /* FSM_API_REVISION */
 #else /* HAVE_LIBFSM */
 # error "You need libFSM in order to compile this package!"
 #endif

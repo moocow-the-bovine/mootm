@@ -13,10 +13,14 @@ on_reparse "warn"
 # Details
 #-----------------------------------------------------------------------------
 details "
-'dwdsm' is a morphological analyzer
+'mootm' is a morphological analyzer
 program based on the 'libmoot' library, using Thomas
 Hanneforth's FSM library for representation and manipulation
 of the underlying finite-state machines.
+
+It takes as its input one or more 'rare' or 'medium' (+/-tagged,-analyzed)
+text files, and outputs 'medium rare' or 'well done' (+analzed) text files,
+respectively.  See mootfiles(5) for details on moot file formats.
 "
 
 #-----------------------------------------------------------------------------
@@ -88,9 +92,9 @@ string "output"	o "Specify output file (default=stdout)." \
     default="-"
 
 #---------------------------------------------------
-# Output format options
+# I/O format options
 #---------------------------------------------------
-group "Output Format Options"
+group "I/O Format Options"
 
 flag "avm"       a "Produce AVM ('vector') output." \
     details="Ambiguous-mode only"
@@ -101,8 +105,14 @@ flag "avm"       a "Produce AVM ('vector') output." \
 flag "reanalyze" r "Force re-analysis of pre-analyzed tokens." \
     details="Useful if you want to add additional analyses to preprocessor output."
 
-flag "dequote"   q "Auto-dequote output tags." \
-    details="For compatibility."
+#flag "dequote"   q "Auto-dequote output tags." \
+#    details="For compatibility."
+
+flag  "first-is-best" 1 "Assume 1st analysis is 'best' for each input token." \
+    details="Useful for re-analysis & class-based training with mootrain(1)."
+
+flag  "ignore-first" 2 "Ignore the first analysis for each input token." \
+    details="Useful for re-analysis & class-based training with mootrain(1)."
 
 
 #---------------------------------------------------
@@ -128,19 +138,21 @@ This file should contain a finite-state transducer to be
 used for morphological analysis.
 "
 
-string "tagx" x "Specify tag-extraction transducer." \
-    arg="FILE" \
-    details="
-This file should contain a finite-state transducer which extracts
-PoS tags from the output-tape of the morphological transducer.
-If unspecified, the morphological transducer is itself expected to
-output PoS tags.
-
-Warning: use of a tag-extraction FST slows down analysis time
-immensely.  This is in part due to a bug in the C++ FSM library.
-It should nonetheless work correctly, due to heroic efforts on
-the part of the author of this program.
-"
+#string "tagx" x "Specify tag-extraction transducer." \
+#    arg="FILE" \
+#    details="
+#This file should contain a finite-state transducer which extracts
+#PoS tags from the output-tape of the morphological transducer.
+#If unspecified, the morphological transducer is itself expected to
+#output PoS tags.
+#
+#Warning: use of a tag-extraction FST slows down analysis time
+#immensely.
+#"
+#
+#This is in part due to a bug in the C++ FSM library.
+#It should nonetheless work correctly, due to heroic efforts on
+#the part of the author of this program.
 
 #-----------------------------------------------------------------------------
 # Addenda
@@ -152,7 +164,7 @@ the part of the author of this program.
 #-----------------------------------------------------------------------------
 bugs "
 
-Quite slow in the general case.
+Probably many.
 
 "
 
@@ -161,4 +173,4 @@ Quite slow in the general case.
 #-----------------------------------------------------------------------------
 acknowledge `cat acknowledge.pod`
 
-seealso "mootpp(1), moothmm(1), moot(1)"
+seealso "mootpp(1), moot(1), mootfiles(5)"

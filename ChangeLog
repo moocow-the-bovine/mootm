@@ -1,4 +1,15 @@
 ChangeLog for package mootm
 
-0.0.1 Fri, 21 May 2004 13:36:16 +0200
-	+ original version
+2.0.1 Thu, 10 Jun 2004 20:17:07 +0200
+	+ added support for fsmlib 0.1.x
+	  - tested version calls itself 0.1.1.1, which it
+	    seems to have been doing for about a year
+	    of (active?) development now... odd, that.
+	+ removed tag-extraction and auto-dequote support
+	  - mootTokenLexer should take care of that for
+	    us now, providing no conventions change unexpectedly
+	    (ha!)
+	
+2.0.0 Fri, 21 May 2004 13:36:16 +0200
+	+ revised to use 'mootToken' interface
+	+ original version, extracted from 'moot'

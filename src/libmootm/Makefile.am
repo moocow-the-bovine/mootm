@@ -141,7 +141,8 @@ libmootm_la_LDFLAGS = -version-info $(LIBCUR):$(LIBREV):$(LIBAGE)
 #libmootm_la_LDFLAGS =
 #libmootm_la_LIBADD  = -lFSMExt -lFSM -lFSMSymSpec -lbumble++ @STL_LIBS@ -lz
 
-libmootm_la_LIBADD = @FSMEXT_LIBS@
+#libmootm_la_LIBADD = @FSMEXT_LIBS@
+libmootm_la_LIBADD = @FSM_LIBS@
 
 ##-----------------------------------------------------------------------
 ## Variables: cleanup
