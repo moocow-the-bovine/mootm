@@ -1,0 +1,67 @@
+# -*- Mode: Shell-Script -*-
+Name: @PACKAGE@
+Version: @VERSION@
+Release: @BINDIST_RELEASE@
+Copyright: Copyright (c) 2002-2004 by Bryan Jurish.  All Rights Reserved.
+Summary: moocow's part-of-speech tagging library (morphology).
+Group: dev
+Source: @PACKAGE@-@VERSION@.tar.gz
+#Patch: 
+BuildRoot: /var/tmp/%{name}-buildroot
+#BuildRoot: buildroot
+
+%description
+moocow's part-of-speech tagging library: morphology.
+
+
+%package doc
+Group: doc
+Summary: HTML documentation for moot PoS tagging package (morphology).
+
+%description doc
+HTML documentation for moot PoS tagging package (morphology).
+
+
+%prep
+%setup -n @PACKAGE@-@VERSION@
+# %patch -p1 .buildroot
+
+%build
+./configure \
+	--prefix=/usr \
+	--with-doc-formats=man,html
+make all ifiles
+
+%install
+echo "-------------------- RPM_BUILD_ROOT=$RPM_BUILD_ROOT ----------------"
+test -n "$RPM_BUILD_ROOT" \
+    && test "$RPM_BUILD_ROOT" != "/" \
+    && rm -rf "$RPM_BUILD_ROOT"
+mkdir -p "$RPM_BUILD_ROOT"
+make prefix="$RPM_BUILD_ROOT/usr" install
+
+%clean
+make distclean
+test -n "$RPM_BUILD_ROOT" \
+    && test "$RPM_BUILD_ROOT" != "/" \
+    && rm -rf "$RPM_BUILD_ROOT"
+
+%post
+ldconfig
+
+%files
+%defattr(-,root,root)
+/usr/bin/mootm*
+/usr/lib/libmootm.*
+/usr/lib/pkgconfig/mootm.*
+/usr/include/mootm/*
+/usr/man/man1/mootm*
+%doc /usr/share/doc/mootm/AUTHORS
+%doc /usr/share/doc/mootm/ChangeLog
+%doc /usr/share/doc/mootm/COPYING
+%doc /usr/share/doc/mootm/INSTALL
+%doc /usr/share/doc/mootm/README.txt
+
+%files doc
+/usr/share/doc/mootm/libmootm
+/usr/share/doc/mootm/programs
