@@ -39,9 +39,7 @@ vpath %.h $(DOXY_INCLUDES)
 
 DOXY_INPUTS = \
 	mainpage.dox \
-	mootmConfig.h \
-	mootFSM.h \
-	mootMorph.h
+	$(foreach dir,$(DOXY_INCLUDES),$(wildcard $(dir)/*.h))
 
 #-----------------------------------------------------------------------
 # Additional dependencies
@@ -50,11 +48,14 @@ DOXY_INPUTS = \
 ## --- doxygen hacks: dependencies
 $(man3_MANS): $(STAMPFILE)
 
-$(STAMPFILE): $(DOXY_INPUTS)
+$(STAMPFILE): $(DOXY_INPUTS) doxy-filter.cfg
 
 #-----------------------------------------------------------------------
 # doxygen hack: build rules (recurse in this directory)
 #-----------------------------------------------------------------------
+doxy-filter.cfg:
+	echo -e '$$config_cppflags .= "$(patsubst %,-I%,$(DOXY_INCLUDES))";\n1;' > doxy-filter.cfg
+
 .doxy.stamp: doxy-filter.cfg
 	@(if test -n "$(DOXYGEN)" ; then \
 	  echo "$(DOXYGEN) $<" ;\

@@ -4,19 +4,19 @@
    libmootm : moocow's morphology library:
    Copyright (C) 2004 by Bryan Jurish <moocow@ling.uni-potsdam.de>
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 /*----------------------------------------------------------------------
@@ -42,8 +42,12 @@
 # include <FSMTypes.h>
 # include <FSM.h>
 # include <FSMSymSpec.h>
+#if FSM_API_REVISION == 0
 # include <FSMCost.h>
 # include <FSMRegexCompiler.h>
+#else /* FSM_API_REVISION != 0 */
+# include <FSMWeight.h>
+#endif /* FSM_API_REVISION */
 #else /* HAVE_LIBFSM */
 # error "You need libFSM in order to compile this package!"
 #endif

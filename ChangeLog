@@ -1,4 +1,37 @@
 ChangeLog for package mootm
 
-0.0.1 Fri, 21 May 2004 13:36:16 +0200
-	+ original version
+2.0.3 Sun, 08 Aug 2004 16:45:39 +0200
+	+ changed copyright policy for lib to LGPL-2.1
+	+ added COPYING.LIB
+	+ bugfix for moot-2.0.4-pre2
+	
+2.0.2 Fri, 09 Jul 2004 01:02:30 +0200
+	+ changed to jive with moot 2.0.0 API
+	+ added 'static' build target
+	  - major hack required for libFSM<->libFSMTools interdependence
+	    * must double-link libFSM:
+	         ld ... -lFSM .. -lFSMTools ... -lFSM ...
+	    * Problem: libtool is too smart for poorly (im(ns)ho)
+	      designed libraries: it assumes truly modular libraries,
+	      mangling the above call into:
+	         ld ... -lFSMTools -lFSM ...
+	    * Hack:
+	      ~ added symlink in /usr/local/lib :
+		 libFSMStaticHack.a->libFSM.a
+	      ~ added configure argument '--enable-all-static'
+	        to handle the logic, so we end up calling:
+	         ld ... -lFSM ... -lFSMTools ... -lFSMStaticHack ...
+	
+2.0.1 Thu, 10 Jun 2004 20:17:07 +0200
+	+ added support for fsmlib 0.1.x
+	  - tested version calls itself 0.1.1.1, which it
+	    seems to have been doing for about a year
+	    of (active?) development now... odd, that.
+	+ removed tag-extraction and auto-dequote support
+	  - mootTokenLexer should take care of that for
+	    us now, providing no conventions change unexpectedly
+	    (ha!)
+	
+2.0.0 Fri, 21 May 2004 13:36:16 +0200
+	+ revised to use 'mootToken' interface
+	+ original version, extracted from 'moot'

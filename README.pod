@@ -2,7 +2,7 @@
 
 README for package 'mootm'
 
-Last updated for mootmorph version 0.0.1
+Last updated for mootm version 2.0.1
 
 =head1 DESCRIPTION
 
@@ -11,12 +11,6 @@ mootm - moocow's part-of-speech tagger: morphology.
 =head1 REQUIREMENTS
 
 =over 4
-
-=item STLport E<gt>= 4.5.3
-
-Available from http://www.stlport.org
-
-Only required for building with gcc-2.x.
 
 
 =item pkg-config
@@ -35,6 +29,13 @@ or
 from the official distribution site of this package.
 
 Tested with flex++-v2.3.8-4 and bison++-v1.21-5.
+
+
+=item STLport E<gt>= 4.5.3
+
+Available from http://www.stlport.org
+
+Only required for building with gcc-2.x.
 
 
 =begin comment text
@@ -118,10 +119,18 @@ these sources.
 
 =head1 KNOWN BUGS
 
+Looks like there is a memory leak somewhere...
+
+=begin comment text
+
 This package is obsolete and deprecated.
 Potential users are strongly encouraged to switch to
-(? what it called and where should I point to ?)
+MorphConsole, available at ... ?
 
+This will cease being a comment as soon as
+MorphConsole has matured a bit.
+
+=end comment text
 
 =head1 ACKNOWLEDGEMENTS
 
