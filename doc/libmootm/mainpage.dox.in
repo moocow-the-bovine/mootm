@@ -8,12 +8,12 @@
 
 
 
-\section Intro Introduction
+\section intro Introduction
 
 libmootm is a C++ library for morphological analysis using
 Thomas Hanneforth's libFSM library.
 
-\section Morph Morphological Analysis
+\section morph Morphological Analysis
 
 The \link mootm::mootMorph mootMorph\endlink
 class is designed to be a wrapper for a user-defined
@@ -28,7 +28,7 @@ maps morphological output paths to PoS tags.
 
 
 
-\section Ack Acknowledgements
+\section acknowledgements Acknowledgements
 
 Development of this package was supported by the project
 <A HREF="http://www.bbaw.de/forschung/kollokationen">Kollokationen im Wörterbuch</A>
@@ -57,7 +57,7 @@ which was used in the development and testing of this
 package.
 
 
-\section SeeAlso More Information
+\section info More Information
 
 \see FSM
 \see <A HREF="../../programs/mootm.html">mootm(1)</A>
