@@ -1,6 +1,6 @@
 /*
-   moot-utils version 1.0.4 : moocow's part-of-speech tagger
-   Copyright (C) 2002-2003 by Bryan Jurish <moocow@ling.uni-potsdam.de>
+   mootm : moocow's part-of-speech tagger : morphology
+   Copyright (C) 2002-2004 by Bryan Jurish <moocow@ling.uni-potsdam.de>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 
-/* just include the config.h for libmoot */
-#include <mootConfig.h>
+/* just include the config.h for libmootm */
+#include <moomtConfig.h>
 
 /* PACKAGE does not jive well with multiple-program pacakges
    using 'gengetopt'.  'autoheader' doesn't like to undefine
