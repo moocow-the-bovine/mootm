@@ -120,6 +120,9 @@ void GetMyOptions(int argc, char **argv)
   morph.force_reanalysis   = args.reanalyze_given;
   morph.do_dequote         = args.dequote_given;
 
+  morph.first_analysis_is_best = args.first_is_best_given;
+  morph.ignore_first_analysis  = args.ignore_first_given;
+
   if      (args.verbose_arg <= vlSilent)   morph.verbose = mootMorph::vlSilent;
   //else if (args.verbose_arg <= vlErrors)   morph.verbose = mootMorph::vlErrors;
   //else if (args.verbose_arg <= vlProgress) morph.verbose = mootMorph::vlErrors;

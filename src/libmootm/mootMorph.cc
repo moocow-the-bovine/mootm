@@ -133,7 +133,7 @@ FSM *mootMorph::load_fsm_file(const char *filename, FSM **fsm, bool *i_made_fsm)
 
 bool mootMorph::tag_stream(FILE *in, FILE *out, char *srcname)
 {
-  TokenReader treader;
+  TokenReader treader(first_analysis_is_best,ignore_first_analysis);
   TokenWriter twriter;
   treader.select_stream(in, srcname);
 
@@ -146,10 +146,11 @@ bool mootMorph::tag_stream(FILE *in, FILE *out, char *srcname)
   // -- do analysis
   do {
     mootSentence &sent = treader.get_sentence();
-    if (sent.empty()) break;
+    if (treader.lexer.lasttyp == TF_EOF) break;
 
     for (mootSentence::iterator si = sent.begin(); si != sent.end(); si++) {
-      if (force_reanalysis || si->analyses.empty()) analyze_token(*si);
+      if (si->flavor() == TF_COMMENT) continue; //-- ignore comments
+      if (force_reanalysis || si->analyses().empty()) analyze_token(*si);
       ntokens++;
       if (nprogress && ntokens % nprogress == 0) fputc('.',stderr);
     }

@@ -104,11 +104,13 @@ POD2HTMLFLAGS = --podpath="$(srcdir):." --htmlroot="."
 
 ## --- clean:  built by 'make'
 CLEANFILES = \
-	*.pod *.man *.1 *.html *.txt *.tex *.dvi *.ps *.pdf \
-	*.log *.aux *.toc *.idx *~~
+	$(filter-out acknowledge.pod,$(wildcard *.pod)) \
+	*.man *.1 *.html *.txt *.tex *.dvi *.ps *.pdf \
+	*.log *.aux *.toc *.idx *.tmp *~~
 
 ## --- distclean: built by 'configure'
-DISTCLEANFILES = *.gog
+DISTCLEANFILES = \
+	*.pod *.gog
 
 ## -- maintainerclean: built by maintainer / by hand
 MAINTAINERCLEANFILES = \

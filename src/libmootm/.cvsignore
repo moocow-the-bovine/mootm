@@ -10,8 +10,8 @@
 *.fst
 *.tfst
 *.lab
-mootConfig.h
-mootConfig.h.in
+mootmConfig.h
+mootmConfig.h.in
 mootPPLexer.cc
 mootPPLexer.h
 mootTaggerLexer.cc

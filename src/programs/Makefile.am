@@ -151,7 +151,9 @@ mootm_LDADD = $(LDADD_COMMON)
 #MOSTLYCLEANFILES =
 
 ## --- clean:  built by 'make'
-#CLEANFILES =
+CLEANFILES = \
+	*.o \
+	*.man *.1 *.3 *.5 *.html *.pdf *.tex *.txt *.tmp
 
 ## --- distclean: built by 'configure'
 #DISTCLEANFILES =
@@ -159,8 +161,7 @@ mootm_LDADD = $(LDADD_COMMON)
 ## -- maintainerclean: built by maintainer / by hand
 MAINTAINERCLEANFILES = \
 	*~ .*~ Makefile Makefile.in \
-	*_cmdparser.cc *_cmdparser.h \
-	*.pod *.man *.1 *.html *.txt *.tex
+	*_cmdparser.cc *_cmdparser.h
 
 ##-----------------------------------------------------------------------
 ## Variables: distribution
