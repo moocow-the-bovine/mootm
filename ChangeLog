@@ -1,5 +1,10 @@
 ChangeLog for package mootm
 
+2.0.3 Sun, 08 Aug 2004 16:45:39 +0200
+	+ changed copyright policy for lib to LGPL-2.1
+	+ added COPYING.LIB
+	+ bugfix for moot-2.0.4-pre2
+	
 2.0.2 Fri, 09 Jul 2004 01:02:30 +0200
 	+ changed to jive with moot 2.0.0 API
 	+ added 'static' build target
