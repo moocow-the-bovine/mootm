@@ -409,7 +409,7 @@ public:
    */
   inline void analyze_token(mootToken &tok)
   {
-    tag_token(tok.toktext.c_str()); //-- populate 'analyses'
+    tag_token(tok.text().c_str()); //-- populate 'analyses'
 
     //-- add analyses to token
     for (anlsi = analyses.begin(); anlsi != analyses.end(); anlsi++) {
@@ -425,7 +425,7 @@ public:
       }
 
       analysis.cost = anlsi->weight;
-      tok.analyses.insert(analysis);
+      tok.insert(analysis);
     }
   };
   //@}

@@ -149,7 +149,7 @@ bool mootMorph::tag_stream(FILE *in, FILE *out, char *srcname)
     if (sent.empty()) break;
 
     for (mootSentence::iterator si = sent.begin(); si != sent.end(); si++) {
-      if (force_reanalysis || si->analyses.empty()) analyze_token(*si);
+      if (force_reanalysis || si->analyses().empty()) analyze_token(*si);
       ntokens++;
       if (nprogress && ntokens % nprogress == 0) fputc('.',stderr);
     }
