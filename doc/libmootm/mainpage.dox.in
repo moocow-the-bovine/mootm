@@ -63,6 +63,6 @@ package.
 \see <A HREF="../../programs/mootm.html">mootm(1)</A>
 moot(1)
 
-\todo Port to new libFSM.
+\todo Get tag-extraction back.
 
 */

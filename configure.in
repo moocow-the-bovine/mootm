@@ -3,7 +3,7 @@ AC_PREREQ(2.5)
 
 dnl Some handy macros
 define([THE_PACKAGE_NAME],    [mootm])
-define([THE_PACKAGE_VERSION], [2.0.0])
+define([THE_PACKAGE_VERSION], [2.0.1])
 define([THE_PACKAGE_AUTHOR],  [moocow@ling.uni-potsdam.de])
 
 AC_INIT(THE_PACKAGE_NAME, THE_PACKAGE_VERSION, THE_PACKAGE_AUTHOR)
@@ -161,12 +161,12 @@ case "$ac_cv_fsm_version" in
     ;;
 
   0.1.1.*)
-    AC_MSG_WARN([])
-    AC_MSG_WARN([])
-    AC_MSG_WARN([FSM >= 0.1.1.* not supported!])
-    AC_MSG_WARN([])
-    AC_MSG_WARN([])
-    AC_MSG_ERROR([Your system is too new.  Get MorphConsole.])
+    dnl AC_MSG_WARN([])
+    dnl AC_MSG_WARN([])
+    dnl AC_MSG_WARN([FSM >= 0.1.1.* not supported!])
+    dnl AC_MSG_WARN([])
+    dnl AC_MSG_WARN([])
+    dnl AC_MSG_ERROR([Your system is too new.  Get MorphConsole.])
     ##--
     CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I libFSM`"
     LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L libFSM`"
@@ -175,20 +175,8 @@ case "$ac_cv_fsm_version" in
     ;;
 
   *)
+     ##-- default to API 1
      FSM_API_REVISION=-1
-
-     ##-- check for zlib
-     AC_CHECK_LIB(z,deflate,[ac_cv_have_libz="yes"])
-     if test "$ac_cv_have_libz" != "yes" ; then
-       AC_MSG_WARN([zlib library (-lz) not found!])
-       AC_MSG_WARN([Is the directory containing 'libz.a' in your LDFLAGS environment variable?])
-       AC_MSG_ERROR([Required package not found -- aborting.])
-     else
-       LIBS="$LIBS -lz"
-     fi
-dnl zlib
-dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
      ;;
 esac
 AC_SUBST(FSMEXT_LIBS)

@@ -38,8 +38,14 @@
 #include <set>
 #include <list>
 
+#include <mootToken.h>
+#include <mootTokenIO.h>
+
+#if FSM_API_REVISION > 0
+# include <fstream>
+#endif /* FSM_API_REVISION */
+
 #include "mootMorph.h"
-#include "mootTokenIO.h"
 
 namespace mootm {
   using namespace std;
@@ -94,8 +100,11 @@ FSMSymSpec *mootMorph::load_morph_symbols(const char *filename)
   i_made_syms = true;
 
   //-- use symspec in FST(s) if not already in use
+#if FSM_API_REVISION == 0
   if (mfst) mfst->fsm_use_symbol_spec(syms);
-  if (xfst) xfst->fsm_use_symbol_spec(syms);
+#else /* FSM_API_REVISION != 0 */
+  if (mfst) mfst->fsm_use_symbol_spec(*syms);
+#endif /* FSM_API_REVISION */
 
   //-- cleanup
   free(syms_filename_cp);
@@ -111,7 +120,14 @@ FSM *mootMorph::load_fsm_file(const char *filename, FSM **fsm, bool *i_made_fsm)
   // -- cleanup old FSM first
   if (*fsm && i_made_fsm && *i_made_fsm) { delete *fsm; }
 
+#if FSM_API_REVISION == 0
   *fsm = new FSM(filename);
+#else /* FSM_API_REVISION != 0 */
+  ifstream ifs(filename, ios::in|ios::binary);
+  *fsm = new FSM(ifs, filename);
+  ifs.close();
+#endif /* FSM_API_REVISION */
+
   if (!**fsm) {
     carp("mootMorph::load_fsm_file() Error: load failed for FSM file '%s'.\n", filename);
     *fsm = NULL; // -- invalidate the object
@@ -172,14 +188,50 @@ bool mootMorph::tag_strings(int argc, char **argv, FILE *out, char *srcname)
   // -- ye olde guttes
   mootSentence sent;
   TokenWriter twriter;
+  mootToken tok;
   for ( ; --argc >= 0; argv++) {
-    mootToken t(*argv);
-    analyze_token(t);
-    sent.push_back(t);
+    tok.clear();
+    tok.text((const char *)*argv);
+
+    /*
+    printf("DEBUG (-analyzed): ");
+    printf("  text=`%s'\n", tok.text().c_str());
+    printf("  analyses.size()=`%d'\n", tok.analyses().size());
+    printf("  besttag=`%s'\n", tok.besttag().c_str());
+    twriter.token_put(stdout, tok);
+    printf("/DEBUG (-analyzed)\n");
+    */
+    
+    analyze_token(tok);
+
+    /*
+    printf("DEBUG (+analyzed): ");
+    printf("  text=`%s'\n", tok.text().c_str());
+    printf("  analyses.size()=`%d'\n", tok.analyses().size());
+    printf("  besttag=`%s'\n", tok.besttag().c_str());
+    twriter.token_put(stdout, tok);
+    printf("/DEBUG (+analyzed)\n\n");
+    */
+
+    sent.push_back(tok);
     ntokens++;
   }
+  /*
+  printf("DEBUG: sent.size()=%d\n", sent.size());
+  for (mootSentence::iterator si = sent.begin(); si != sent.end(); si++) {
+    //printf("DEBUG: si->text=`%s'\n", si->text().c_str());
+    //printf("     : si->best=`%s'\n", si->besttag().c_str());
+    //printf("DEBUG: ");
+    //mootToken t2 = *si;
+    string s = twriter.token_string(*si);
+    printf("%s\n", s.c_str());
+    ;
+  }
+  */
+
   twriter.sentence_put(out, sent);
 
+  sent.clear();
   return true;
 }
 
@@ -207,74 +259,7 @@ bool mootMorph::tag_strings(int argc, char **argv, FILE *out, char *srcname)
  * Mid-level tagging utilities: conversions
  *--------------------------------------------------------------------------*/
 
-void mootMorph::symbol_vector_to_string_dq(const vector<FSMSymbol> &vec, FSMSymbolString &str)
-const
-{
-  bool last_was_char = true;
-  str.clear();
-
-  //-- Special case for first symbol --
-  vector<FSMSymbol>::const_iterator vi;
-  for (vi = vec.begin(); vi != vec.end(); vi++) {
-    register const FSMSymbolString *isym = syms->symbol_to_symbolname(*vi);
-    if (isym == NULL) {
-      if (verbose >= vlWarnings) {
-	carp("mootMorph::symbol_vector_to_string_dq(): Error: undefined symbol '%d' -- ignored\n",
-	     *vi);
-      }
-      continue;
-    }
-    else { //-- isym==NULL
-      if (isym->size() > 1) {
-	if ((*isym)[0] == '_') {
-	  //str.append(*isym, 1, isym->size());
-	  str.append(isym->begin()+1, isym->end());
-	} else {
-	  str.append(*isym);
-	}
-	//str.push_back('.');
-	last_was_char = false;
-      } else {
-	str.push_back((*isym)[0]);
-	last_was_char = true;
-      }
-    }
-    break;
-  }
-
-
-  //-- Normal case --
-  for (vi++; vi != vec.end(); vi++) {
-    if (*vi == EPSILON || *vi == FSMNOLABEL) continue;
-    register const FSMSymbolString *isym = syms->symbol_to_symbolname(*vi);
-    if (isym == NULL) {
-      if (verbose >= vlWarnings) {
-	carp("mootMorph::symbol_vector_to_string_dq(): Error: undefined symbol '%d' -- ignored\n",
-	     *vi);
-      }
-      continue;
-    }
-    else { //-- isym==NULL
-      // -- it's a kosher symbol
-      if (isym->size() > 1) {
-	str.push_back('.');
-	if ((*isym)[0] == '_') {
-	  //str.append(*isym, 1, isym->size());
-	  str.append(isym->begin()+1, isym->end());
-	} else {
-	  str.append(*isym);
-	}
-	last_was_char = false;
-      } else {
-	if (!last_was_char) str.push_back('.');
-	str.push_back((*isym)[0]);
-	last_was_char = true;
-      }
-    }
-  }
-};
-
-
+// (removed)
 
 /*--------------------------------------------------------------------------
  * Debugging Methods
@@ -335,9 +320,13 @@ string mootMorph::analyses_to_string(const set<FSM::FSMWeightedSymbolVector> &an
 	s += " : ";
 	s += symbol_vector_to_string_n(asi->istr);
       }
-      if (asi->weight != 0.0) {
-	char buf[256];
+      if ((double)asi->weight != (double)0.0) {
+	char buf[64];
+#if FSM_API_REVISION == 0
 	sprintf(buf, " <%g>", asi->weight);
+#else /* FSM_API_REVISION != 0 */
+	sprintf(buf, " <%g>", asi->weight.weight());
+#endif /* FSM_API_REVISION */
 	s += buf;
       }
     }
@@ -361,9 +350,13 @@ mootMorph::analyses_to_string(const set<FSM::FSMStringWeight> &analyses)
 	s += " : ";
 	s += asi->ostr;
       }
-      if (asi->weight != 0.0) {
-	char buf[256];
+      if ((double)asi->weight != (double)0.0) {
+	char buf[64];
+#if FSM_API_REVISION == 0
 	sprintf(buf, " <%g>", asi->weight);
+#else /* FSM_API_REVISION != 0 */
+	sprintf(buf, " <%g>", asi->weight.weight());
+#endif /* FSM_API_REVISION */
 	s += buf;
       }
     }

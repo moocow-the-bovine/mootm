@@ -40,7 +40,6 @@ SUFFIXES = \
 #${prog_i}_SOURCES =
 #${lib_i}_la_SOURCES =
 mootm_SOURCES = \
-	cmdutil.cc cmdutil.h \
 	mootm_main.cc \
 	mootm_cmdparser.cc mootm_cmdparser.h
 

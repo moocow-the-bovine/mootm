@@ -36,11 +36,11 @@
 #define moot_MORPH_DEBUG
 //#undef moot_MORPH_DEBUG
 
-
 #include <stdio.h>
+#include <mootToken.h>
+#include <mootTokenIO.h>
 
 #include "mootFSM.h"
-#include "mootToken.h"
 /* #include <mootTypes.h> */
 
 namespace mootm {
@@ -106,27 +106,6 @@ public:
       \warning The analysis FSAs \f$Morph(w)\f$ may not contain any epsilon cycles!
   */
   FSM *mfst;
-
-  /**
-   * Tag-extraction FST \f$T_{tagx}\f$:
-     \f[
-       \begin{eqnarray*}
-         Tagx(w) &:=&
-           \left\{
-             \begin{array}{ll}
-               \pi_{2}(Morph(w) \circ T_{tagx}) & \textrm{if}\ T_{tagx} \not= NULL\cr
-               Morph(w) & \textrm{otherwise}
-             \end{array}
-           \right.
-         \cr
-         PoS(w) &:=& strings(Tagx(w))
-       \end{eqnarray*}
-
-       \warning The extractor FST \f$T_{tagx}\f$ may not contain any input epsilon cycles!
-       \warning The extracted tag-FSAs \f$Tagx(w)\f$ may not contain any epsilon cycles!
-     \f]
-  */
-  FSM *xfst;
   //@}
 
 
@@ -138,7 +117,6 @@ public:
   //@{
   string syms_filename;  /**< Name of the symbols-file (for "binary" save) */
   string mfst_filename;  /**< Name of the FST-file (for "binary" save) */
-  string xfst_filename; /**< Name of the tag-extraction FST-file (for "binary" save) */
   //@}
 
   /*------------------------------------------------------------
@@ -155,9 +133,6 @@ public:
    * OBSOLETE.
    */
   //bool want_mabbaw_format;
-
-  /** Do NEGRA-style dequoting in output-string generation ? (default = false) */
-  bool do_dequote;
 
   /** Force re-analysis of pre-analyzed tokens? (default = false) */
   bool force_reanalysis;
@@ -208,7 +183,6 @@ protected:
   //@{
   bool i_made_syms;
   bool i_made_mfst;
-  bool i_made_xfst;
   //@}
 
 protected:
@@ -252,16 +226,12 @@ public:
   /** \name Construction / Destruction */
   //@{
   /** constructor */
-  mootMorph(FSMSymSpec *mysyms=NULL, FSM *myfst=NULL, FSM *myxfst=NULL) :
+  mootMorph(FSMSymSpec *mysyms=NULL, FSM *myfst=NULL) :
     syms(mysyms), 
     mfst(myfst),
-    xfst(myxfst),
     syms_filename("mootMorph.sym"),
     mfst_filename("mootMorph.fst"),
-    xfst_filename("mootMorph_x.fst"),
     want_avm(false),
-    //want_mabbaw_format(false),
-    do_dequote(false),
     force_reanalysis(false),
     first_analysis_is_best(false),
     ignore_first_analysis(false),
@@ -272,7 +242,6 @@ public:
     nprogress(0),
     i_made_syms(false),
     i_made_mfst(false),
-    i_made_xfst(false),
     result(NULL),
     tmp(new FSM()),
     tmpx(new FSM())
@@ -286,6 +255,9 @@ public:
    * public methods: initialization
    */
 
+  /** Low-level FSTfile loading utility */
+  FSM *load_fsm_file(const char *fsm_file, FSM **fsm, bool *i_made_fsm=NULL);
+
   /** \name Initialization */
   //@{
   /** Load morphological symbols-file, "filename" defaults to 'syms_filename' */
@@ -297,20 +269,15 @@ public:
     if (filename) mfst_filename = (const char *)filename;
     if (load_fsm_file(mfst_filename.c_str(), &mfst, &i_made_mfst))
       {
-	if (syms) mfst->fsm_use_symbol_spec(syms);
+	if (syms) {
+#if FSM_API_REVISION == 0
+	  mfst->fsm_use_symbol_spec(syms);
+#else /* FSM_API_REVISION != 0 */
+	  mfst->fsm_use_symbol_spec(*syms);
+#endif /* FSM_API_REVISION */
+	}
       }
     return mfst;
-  };
-
-  /** Load tag-extraction FST, 'filename' defaults to 'xfst_filename' */
-  FSM *load_tagx_fst(const char *filename=NULL)
-  {
-    if (filename) xfst_filename = (const char *)filename;
-    if (load_fsm_file(xfst_filename.c_str(), &xfst, &i_made_xfst))
-      {
-	if (syms) xfst->fsm_use_symbol_spec(syms);
-      }
-    return xfst;
   };
   //@}
 
@@ -381,15 +348,11 @@ public:
     tmp->fsm_clear();
     result = mfst->fsm_lookup(curtok_s, tmp, true);
 
-    //-- serialize, extracting tags
+    //-- serialize, NOT extracting tags
     analyses.clear();
-    if (xfst) {
-      extract_tags(*tmp, analyses);
-    }
-    else {
-      //-- just serialize
-      tmp->fsm_symbol_vectors(analyses, false);
-    }
+
+    //-- just serialize
+    tmp->fsm_symbol_vectors(analyses, false);
 
     //-- track statistics
     nanalyzed++;
@@ -410,7 +373,7 @@ public:
    */
   inline void analyze_token(mootToken &tok)
   {
-    tag_token(tok.text().c_str()); //-- populate mootMorph instance datum 'analyses'
+    tag_token(tok.text()); //-- populate mootMorph instance datum 'analyses'
 
     //-- add analyses to token
     for (anlsi = analyses.begin(); anlsi != analyses.end(); anlsi++) {
@@ -425,54 +388,13 @@ public:
 	symbol_vector_to_string(anlsi->istr, analysis.tag);
       }
 
+#if FSM_API_REVISION == 0
       analysis.cost = anlsi->weight;
+#else // FSM_API_REVISION != 0
+      analysis.cost = anlsi->weight.weight();
+#endif // FSM_API_REVISION
       tok.insert(analysis);
     }
-  };
-  //@}
-
-  /*------------------------------------------------------------
-   * public methods: tag-extraction
-   */
-
-  /** \name PoS-Tag Extraction */
-  //@{
-  /**
-   * This method should just be a pair of libFSM calls,
-   * but since they don't work (HINT), it's big and slow...
-   * Complaints to [EXPUNGED].
-   * This bug reportedly has been fixed in newer versions libFSM.
-   *
-   * @param morph_w Token-Analysis result FSM.
-   * @param pos_w PoS-analyses to generate (clear it first yourself)
-   * @return pos_w
-   */
-  MorphAnalysisSet &extract_tags(FSM &morph_w, MorphAnalysisSet &pos_w)
-  {
-    //-- QUACK: this should work, but it doesn't (no FSMModeDestructive for compose())
-    //morph_w->fsm_compose(*tagx, FSM::FSMModeDestructive);
-
-    //-- KABOOM: this too should work, but it segfaults (no FSA->compose(FST) ?!)
-    //*tmpx = morph_w->fsm_compose(*tagx, FSM::FSMModeConstructive);
-
-    //-- QUACK/KABOOM: followed by:
-    //tmpx->fsm_symbol_vectors(pos_w, false);
-
-    //-- HACK: this *REALLY* ought to work, because I friggin wrote it!
-    //   (unfortunately, it's dog slow!)
-    xanalyses.clear();
-    morph_w.fsm_symbol_vectors(xanalyses, false);
-    for (MorphAnalysisSet::const_iterator xai = xanalyses.begin(); xai != xanalyses.end(); xai++) {
-      tmpx->fsm_clear();
-      xfst->fsm_lookup_vector(xai->istr, tmpx, true);
-      xxanalyses.clear();
-      tmpx->fsm_symbol_vectors(xxanalyses, false);
-      for (MorphAnalysisSet::const_iterator xxai = xxanalyses.begin(); xxai != xxanalyses.end(); xxai++)
-	{
-	  pos_w.insert(MorphAnalysis(xai->istr, xxai->istr, xxai->weight+xai->weight));
-	}
-    }
-    return pos_w;
   };
   //@}
 
@@ -540,7 +462,11 @@ public:
       }
 
       //-- copy weight as 'cost'
+#if FSM_API_REVISION == 0
       toka.cost = anlsi->weight;
+#else // FSM_API_REVISION != 0
+      toka.cost = anlsi->weight.weight();
+#endif // FSM_API_REVISION
 
       //-- insert analysis
       tok->insert(toka);
@@ -622,15 +548,8 @@ public:
   /** Convert symbol-vectors to pretty strings: general */
   inline void symbol_vector_to_string(const vector<FSMSymbol> &vec, FSMSymbolString &str) const
   {
-    if (do_dequote) {
-      symbol_vector_to_string_dq(vec, str);
-    } else {
-      syms->symbol_vector_to_string(vec, str, want_avm, verbose >= vlWarnings);
-    }
+    syms->symbol_vector_to_string(vec, str, want_avm, verbose >= vlWarnings);
   };
-
-  /** Convert symbol-vectors to pretty strings: dequoting (ugly, but useful) */
-  void symbol_vector_to_string_dq(const vector<FSMSymbol> &vec, FSMSymbolString &str) const;
   //@}
 
 
@@ -643,16 +562,23 @@ public:
    * Hack: check, print, & clear messages associated with our FSMSymSpec
    * We have to keep calling this, otherwise FSMSymSpec would eventually
    * grab all available memory (argh).
+   *
+   * \warning this only works right if you let mootMorph create
+   * its own FSMSymSpec, due to a re-introduced privatization
+   * bug in FSMSymSpec.
    */
   inline void check_symspec_messages(void)
   {
-    if (syms->messages && !syms->messages->empty()) {
+    if (!syms_msgs.empty()) {
       if (verbose >= vlWarnings) {
-	for (list<string>::const_iterator e = syms_msgs.begin(); e != syms_msgs.end(); e++) {
-	  carp("%s\n",e->c_str());
-	}
+	for (list<string>::const_iterator e = syms_msgs.begin();
+	     e != syms_msgs.end();
+	     e++)
+	  {
+	    carp("%s\n",e->c_str());
+	  }
       }
-      syms->messages->clear();
+      syms_msgs.clear();
     }
   };
 
@@ -662,36 +588,16 @@ public:
 
 
   /*------------------------------------------------------------
-   * public methods: low-level: initialization
-   */
-  /** \name Various low-level stuff */
-  //@{
-  /** Low-level FSTfile loading utility */
-  FSM *load_fsm_file(const char *fsm_file, FSM **fsm, bool *i_made_fsm=NULL);
-
-  /*------------------------------------------------------------
-   * checksum
-   */
-
-  /** Return a checksum based on morphology-fst properties */
-  size_t checksum(void)
-  {
-    size_t crc = 0;
-    if (mfst) {
-      crc += mfst->fsm_no_of_states() + mfst->fsm_no_of_final_states() + mfst->fsm_no_of_transitions();
-    }
-    if (syms) {
-      crc += syms->signs()->size() + syms->symbols()->size();
-    }
-    return crc;
-  };
-  //@}
-
-  /*------------------------------------------------------------
    * public methods: debugging
    */
   /** \name Debugging */
   //@{
+
+  /** Print a string to stdout */
+  void printstr(const string &s) {
+    fputs(s.c_str(), stdout);
+  };
+
   /** Convert a symbol-vector to a numeric string */
   string symbol_vector_to_string_n(const FSM::FSMSymbolVector &v);
 

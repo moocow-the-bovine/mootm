@@ -39,8 +39,8 @@
 #endif
 
 #include <mootMorph.h>
+#include <mootUtils.h>
 
-#include "cmdutil.h"
 #include "mootm_cmdparser.h"
 
 using namespace std;
@@ -116,9 +116,9 @@ void GetMyOptions(int argc, char **argv)
 
   //-- mophology object setup: flags
   morph.want_avm           = args.avm_given;
-  //morph.want_mabbaw_format = args.mabbaw_given;
   morph.force_reanalysis   = args.reanalyze_given;
-  morph.do_dequote         = args.dequote_given;
+  //morph.want_mabbaw_format = args.mabbaw_given;
+  //morph.do_dequote         = args.dequote_given;
 
   morph.first_analysis_is_best = args.first_is_best_given;
   morph.ignore_first_analysis  = args.ignore_first_given;
@@ -154,6 +154,7 @@ void GetMyOptions(int argc, char **argv)
   }
 
   //-- morphology object setup : tag-extraction FST
+  /*
   if (args.tagx_given) {
     if (args.verbose_arg >= vlProgress)
       fprintf(stderr, "%s: loading tag-extracion FST '%s'...", PROGNAME, args.tagx_arg);
@@ -164,6 +165,7 @@ void GetMyOptions(int argc, char **argv)
       fprintf(stderr," loaded.\n");
     }
   }
+  */
 
   //-- report
   if (args.verbose_arg >= vlProgress) {
