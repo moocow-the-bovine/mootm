@@ -133,7 +133,7 @@ FSM *mootMorph::load_fsm_file(const char *filename, FSM **fsm, bool *i_made_fsm)
 
 bool mootMorph::tag_stream(FILE *in, FILE *out, char *srcname)
 {
-  TokenReader treader;
+  TokenReader treader(first_analysis_is_best,ignore_first_analysis);
   TokenWriter twriter;
   treader.select_stream(in, srcname);
 

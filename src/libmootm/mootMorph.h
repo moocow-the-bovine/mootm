@@ -154,13 +154,22 @@ public:
    * Generate output strings in old MA-BBAW format? (default = false)
    * OBSOLETE.
    */
-  bool want_mabbaw_format;
+  //bool want_mabbaw_format;
 
   /** Do NEGRA-style dequoting in output-string generation ? (default = false) */
   bool do_dequote;
 
   /** Force re-analysis of pre-analyzed tokens? (default = false) */
   bool force_reanalysis;
+
+  /**  Whether first analysis should be used to instantiate 'besttag' (default=false) */
+  bool first_analysis_is_best;
+
+  /**
+   * Whether to (otherwise) ignore first analysis of each input token (re-analysis).
+   * Default=false.
+   */
+  bool ignore_first_analysis;
   
   /** verbosity level (0..2)
    * \see mootMorph::VerbosityLevel
@@ -251,9 +260,11 @@ public:
     mfst_filename("mootMorph.fst"),
     xfst_filename("mootMorph_x.fst"),
     want_avm(false),
-    want_mabbaw_format(false),
+    //want_mabbaw_format(false),
     do_dequote(false),
     force_reanalysis(false),
+    first_analysis_is_best(false),
+    ignore_first_analysis(false),
     verbose(vlErrors),
     ntokens(0),
     nanalyzed(0),
@@ -314,16 +325,6 @@ public:
 
   /** Top-level: tag a C-array of token-strings */
   bool tag_strings(int argc, char **argv, FILE *out=stdout, char *srcname=NULL);
-
-  /** Top-level: print something for EOS */
-  inline void tag_print_eos(FILE *out)
-  {
-    if (want_mabbaw_format) {
-      fputs("--EOS--\n\n", out);
-    } else {
-      fputc('\n', out);
-    }
-  };
   //@}
 
   /*------------------------------------------------------------
@@ -401,7 +402,7 @@ public:
   };
 
   /**
-   * high-lebel tagging utility: analyse the mootToken 'tok'.
+   * high-level tagging utility: analyse the mootToken 'tok'.
    * Note that any previous analyses in 'tok' are NOT cleared.
    *
    * Don't even THINK about calling this method unlesss
@@ -409,7 +410,7 @@ public:
    */
   inline void analyze_token(mootToken &tok)
   {
-    tag_token(tok.text().c_str()); //-- populate 'analyses'
+    tag_token(tok.text().c_str()); //-- populate mootMorph instance datum 'analyses'
 
     //-- add analyses to token
     for (anlsi = analyses.begin(); anlsi != analyses.end(); anlsi++) {
@@ -439,7 +440,9 @@ public:
   /**
    * This method should just be a pair of libFSM calls,
    * but since they don't work (HINT), it's big and slow...
-   * Complaints to tom@ling.uni-potsdam.de.
+   * Complaints to [EXPUNGED].
+   * This bug has been fixed in newer versions libFSM.
+   *
    * @param morph_w Token-Analysis result FSM.
    * @param pos_w PoS-analyses to generate (clear it first)
    * @return pos_w
@@ -514,11 +517,46 @@ public:
    */
 
   /**
+   * Convert a MorphAnalysisSet (default=current analyses) to a mootToken.
+   *
+   * Probablity not needed.
+   */
+  inline void analyses2mtoken(MorphAnalysisSet *anls = NULL,
+			      mootToken *tok = NULL)
+  {
+    if (!anls) anls = &analyses;
+    for (anlsi = anls->begin(); anlsi != anls->end(); anlsi++) {
+      mootToken::Analysis toka;
+
+      //-- use "input" string for 'details'
+      symbol_vector_to_string(anlsi->istr, toka.details);
+
+      //-- use "output string" to instantiate 'tag' (only works if we've extracted the tag!)
+      if (!anlsi->ostr.empty()) {
+	symbol_vector_to_string(anlsi->ostr, toka.tag);
+      } else {
+	//-- use the whole analysis as the tag (probably wrong!)
+	toka.tag.swap(toka.details);
+      }
+
+      //-- copy weight as 'cost'
+      toka.cost = anlsi->weight;
+
+      //-- insert analysis
+      tok->insert(toka);
+    }
+  };
+
+
+  /*
    * Prints analyses to the specified output stream.
    * @param out Defaults to 'stdout'
    * @param token Defaults to current token 'curtok'
    * @param anls Defaults to current analyses 'analyses'
+   *
+   * OBSOLETE
    */
+  /*
   inline void print_token_analyses(FILE *out = stdout,
 				   const char *token = NULL,
 				   MorphAnalysisSet *anls = NULL)
@@ -527,7 +565,7 @@ public:
     
     fputs(token ? token : curtok_s.c_str(), out);
     if (want_mabbaw_format) {
-      /*-- ambiguous, strings, all features, mabbaw-style */
+      //-- ambiguous, strings, all features, mabbaw-style
       fprintf(out, ": %d Analyse(n)\n", anls->size());
       for (anlsi = anls->begin(); anlsi != anls->end(); anlsi++) {
 	//-- print separator
@@ -550,8 +588,8 @@ public:
 	fprintf(out, (anlsi->weight ? "\t<%f>\n" : "\n"), anlsi->weight);
       }
       fputc('\n', out);
-    } else { /*-- want_mabbaw_format */
-      /*-- ambiguous, strings, all features, one tok/line */
+    } else { //-- want_mabbaw_format
+       //-- ambiguous, strings, all features, one tok/line 
       for (anlsi = anls->begin(); anlsi != anls->end(); anlsi++) {
 	//-- print separator
 	fputc('\t', out);
@@ -574,7 +612,7 @@ public:
       }
       fputc('\n',out);
     }
-  };
+  };*/
 
 
   /*------------------------------------------------------------

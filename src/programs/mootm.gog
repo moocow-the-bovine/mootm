@@ -88,9 +88,9 @@ string "output"	o "Specify output file (default=stdout)." \
     default="-"
 
 #---------------------------------------------------
-# Output format options
+# I/O format options
 #---------------------------------------------------
-group "Output Format Options"
+group "I/O Format Options"
 
 flag "avm"       a "Produce AVM ('vector') output." \
     details="Ambiguous-mode only"
@@ -103,6 +103,12 @@ flag "reanalyze" r "Force re-analysis of pre-analyzed tokens." \
 
 flag "dequote"   q "Auto-dequote output tags." \
     details="For compatibility."
+
+flag  "first-is-best" 1 "Assume 1st analysis is 'best' for each input token." \
+    details="Useful for re-analysis & class-based training with mootrain(1)."
+
+flag  "ignore-first" 2 "Ignore the first analysis for each input token." \
+    details="Useful for re-analysis & class-based training with mootrain(1)."
 
 
 #---------------------------------------------------
