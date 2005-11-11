@@ -23,9 +23,7 @@
  *   + Morphological analyzer moot : main()
  *--------------------------------------------------------------------------*/
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -42,6 +40,7 @@
 #include <mootUtils.h>
 #include <mootCIO.h>
 
+#include <config.h>
 #include "mootm_cmdparser.h"
 
 using namespace std;

@@ -3,7 +3,7 @@ AC_PREREQ(2.5)
 
 dnl Some handy macros
 define([THE_PACKAGE_NAME],    [mootm])
-define([THE_PACKAGE_VERSION], [2.0.3])
+define([THE_PACKAGE_VERSION], [2.0.4])
 define([THE_PACKAGE_AUTHOR],  [moocow@ling.uni-potsdam.de])
 
 AC_INIT(THE_PACKAGE_NAME, THE_PACKAGE_VERSION, THE_PACKAGE_AUTHOR)
@@ -118,13 +118,13 @@ dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 dnl ------------------------------------------------------------
 dnl libFSM (pkg-config)
 dnl
-PKG_CHECK_MODULES(FSMLIB, libFSM >= 0.1.0.6,
+PKG_CHECK_MODULES(FSMLIB, libFSM >= 0.9.0.1,
 	[PC_HAVE_FSMLIB="yes"],
 	[PC_HAVE_FSMLIB=""])
   
 if test -z "$PC_HAVE_FSMLIB" ; then
     AC_MSG_WARN()
-    AC_MSG_WARN([cannot find libFSM >= 0.1.0.6!])
+    AC_MSG_WARN([cannot find libFSM >= 0.9.0.1!])
     AC_MSG_WARN([is your PKG_CONFIG_PATH set correctly?])
     AC_MSG_WARN()
     AC_MSG_ERROR([Required package not found -- aborting.])
@@ -172,7 +172,7 @@ case "$ac_cv_fsm_version" in
 
   *)
     ##-- default to API 1
-    FSM_API_REVISION=-1
+    FSM_API_REVISION=1
     ;;
 esac
 dnl /FSM_API_REVISION
@@ -481,6 +481,10 @@ CXXFLAGS="$CXXFLAGS -ftemplate-depth-24"
 dnl
 dnl cxxflags: template depth
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+dnl ------------------------------------------------------------
+dnl unconfig
+AC_CONFIG_LINKS(src/libmootm/mootmUnConfig.h:src/libmootm/mootmConfig.h.in)
 
 
 dnl ------------------------------------------------------------

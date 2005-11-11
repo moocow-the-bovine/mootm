@@ -45,6 +45,10 @@
 #include <mootToken.h>
 #include <mootTokenIO.h>
 
+#ifdef HAVE_CONFIG_H
+# include <mootmUnConfig.h>
+# include <mootmConfig.h>
+#endif
 
 namespace mootm {
 
@@ -363,7 +367,8 @@ public:
   {
     //-- analyze
     tmp->fsm_clear();
-    result = mfst->fsm_lookup(curtok_s, tmp, true);
+    if (!result) result = new FSM();
+    *result = mfst->fsm_lookup(curtok_s, tmp, true);
 
     //-- serialize, NOT extracting tags
     analyses.clear();
@@ -620,7 +625,8 @@ public:
   };
 
   /** Convert a symbol-vector to a numeric string */
-  string symbol_vector_to_string_n(const FSM::FSMSymbolVector &v);
+  //string symbol_vector_to_string_n(const FSM::FSMSymbolVector &v);
+  string symbol_vector_to_string_n(const FSMSymbolVector &v);
 
   /** Stringify a token-analysis-set (weighted-vector version) */
   string analyses_to_string(const set<FSM::FSMWeightedSymbolVector> &analyses);
@@ -637,5 +643,9 @@ public:
 };
 
 }; /* namespace mootm */
+
+#ifdef HAVE_CONFIG_H
+# include <mootmUnConfig.h>
+#endif
 
 #endif // _moot_MORPH_H_

@@ -35,14 +35,28 @@
 #define _moot_FSM_H
 
 #ifdef HAVE_CONFIG_H
+# include <mootmUnConfig.h>
 # include <mootmConfig.h>
 #endif
 
 #ifdef HAVE_LIBFSM
+
 # include <FSMTypes.h>
 # include <FSM.h>
 # include <FSMSymSpec.h>
+
+# ifdef HAVE_CONFIG_H
+#  include <mootmUnConfig.h>
+#  include <mootmConfig.h>
+# endif
+
 #if FSM_API_REVISION == 0
+
+# ifdef HAVE_CONFIG_H
+#  include <mootmUnConfig.h>
+#  include <mootmConfig.h>
+# endif
+
 # include <FSMCost.h>
 # include <FSMRegexCompiler.h>
 #else /* FSM_API_REVISION != 0 */
@@ -59,5 +73,10 @@
 
 /** Whether to load FSM symbol files in AT&T-compatibility mode */
 #define moot_SYM_ATT_COMPAT true
+
+
+#ifdef HAVE_CONFIG_H
+# include <mootmUnConfig.h>
+#endif
 
 #endif /* _moot_FSM_H */

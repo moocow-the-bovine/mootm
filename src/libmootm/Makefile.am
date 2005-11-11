@@ -54,7 +54,9 @@ libmootm_la_SOURCES = \
 #pkginclude_HEADERS = ${hfile_1} ... ${hfile_N}
 pkginclude_HEADERS = \
 	mootFSM.h \
-	mootMorph.h
+	mootMorph.h \
+	mootmConfig.h \
+	mootmUnConfig.h
 
 ## --- no-install headers
 #noinst_HEADERS = nopackage.h

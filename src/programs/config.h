@@ -18,6 +18,7 @@
 */
 
 /* just include the config.h for libmootm */
+#include <mootmUnConfig.h>
 #include <mootmConfig.h>
 
 /* PACKAGE does not jive well with multiple-program pacakges

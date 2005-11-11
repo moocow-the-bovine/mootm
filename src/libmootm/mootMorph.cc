@@ -27,10 +27,6 @@
  *   + moocow's PoS tagger : morphology
  *--------------------------------------------------------------------------*/
 
-#ifdef HAVE_CONFIG_H
-# include <mootmConfig.h>
-#endif
-
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -44,6 +40,11 @@
 #if FSM_API_REVISION > 0
 # include <fstream>
 #endif /* FSM_API_REVISION */
+
+#ifdef HAVE_CONFIG_H
+# include <mootmUnConfig.h>
+# include <mootmConfig.h>
+#endif
 
 namespace mootm {
   using namespace std;
@@ -290,11 +291,11 @@ void mootMorph::carp(char *fmt, ...) const
 
 /* Convert a symbol-vector to a numeric string */
 string
-mootMorph::symbol_vector_to_string_n(const FSM::FSMSymbolVector &v)
+mootMorph::symbol_vector_to_string_n(const FSMSymbolVector &v)
 {
   string vs;
   char buf[256];
-  for (FSM::FSMSymbolVector::const_iterator vi = v.begin(); vi != v.end(); vi++)
+  for (FSMSymbolVector::const_iterator vi = v.begin(); vi != v.end(); vi++)
     {
       sprintf(buf,"%d",*vi);
       vs.append(buf);
