@@ -23,9 +23,7 @@
  *   + Morphological analyzer moot : main()
  *--------------------------------------------------------------------------*/
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -39,12 +37,15 @@
 #endif
 
 #include <mootMorph.h>
+#include <mootUtils.h>
+#include <mootCIO.h>
 
-#include "cmdutil.h"
+#include <config.h>
 #include "mootm_cmdparser.h"
 
 using namespace std;
 using namespace moot;
+using namespace mootio;
 using namespace mootm;
 
 /*--------------------------------------------------------------------------
@@ -61,7 +62,7 @@ char *symfile = NULL;
 char *fstfile = NULL;
 
 // -- files
-cmdutil_file_info out;
+mofstream out;
 
 // -- global classes/structs
 mootMorph morph;
@@ -97,11 +98,9 @@ void GetMyOptions(int argc, char **argv)
 	    PROGNAME, VERSION);
 
   //-- output file
-  out.name = args.output_arg;
-  if (strcmp(out.name,"-") == 0) out.name = "<stdout>";
-  if (!out.open("w")) {
+  if (!out.open(args.output_arg,"w")) {
     fprintf(stderr,"%s: open failed for output-file '%s': %s\n",
-	    PROGNAME, out.name, strerror(errno));
+	    PROGNAME, out.name.c_str(), out.errmsg().c_str());
     exit(1);
   }
 
@@ -116,9 +115,12 @@ void GetMyOptions(int argc, char **argv)
 
   //-- mophology object setup: flags
   morph.want_avm           = args.avm_given;
-  //morph.want_mabbaw_format = args.mabbaw_given;
   morph.force_reanalysis   = args.reanalyze_given;
-  morph.do_dequote         = args.dequote_given;
+  //morph.want_mabbaw_format = args.mabbaw_given;
+  //morph.do_dequote         = args.dequote_given;
+
+  morph.first_analysis_is_best = args.first_is_best_given;
+  morph.ignore_first_analysis  = args.ignore_first_given;
 
   if      (args.verbose_arg <= vlSilent)   morph.verbose = mootMorph::vlSilent;
   //else if (args.verbose_arg <= vlErrors)   morph.verbose = mootMorph::vlErrors;
@@ -151,6 +153,7 @@ void GetMyOptions(int argc, char **argv)
   }
 
   //-- morphology object setup : tag-extraction FST
+  /*
   if (args.tagx_given) {
     if (args.verbose_arg >= vlProgress)
       fprintf(stderr, "%s: loading tag-extracion FST '%s'...", PROGNAME, args.tagx_arg);
@@ -161,6 +164,7 @@ void GetMyOptions(int argc, char **argv)
       fprintf(stderr," loaded.\n");
     }
   }
+  */
 
   //-- report
   if (args.verbose_arg >= vlProgress) {
@@ -184,20 +188,21 @@ int main (int argc, char **argv)
   // -- the guts
   if (args.words_given) {
     //fprintf(out.file, "# %s: Analyzing command-line tokens\n\n", PROGNAME);
-    morph.tag_strings(args.inputs_num, args.inputs, out.file, out.name);
+    morph.tag_strings(args.inputs_num, args.inputs, out.file, out.name.c_str());
   } else {
     // -- big loop
     for (churner.first_input_file(); churner.in.file; churner.next_input_file()) {
       nfiles++;
       if (args.verbose_arg >= vlProgress) {
-	fprintf(stderr,"%s: analyzing file '%s'...", PROGNAME, churner.in.name);
+	fprintf(stderr, "%s: analyzing file '%s'...",
+		PROGNAME, churner.in.name.c_str());
 	fflush(stderr);
       }
       fprintf(out.file, "\n%%%% %s: File: %s\n\n",
 	      PROGNAME,
-	      churner.in.name);
+	      churner.in.name.c_str());
 
-      morph.tag_stream(churner.in.file, out.file, churner.in.name);
+      morph.tag_stream(churner.in.file, out.file, churner.in.name.c_str());
 
       if (args.verbose_arg >= vlProgress) {
 	fprintf(stderr," done.\n");

@@ -54,7 +54,9 @@ libmootm_la_SOURCES = \
 #pkginclude_HEADERS = ${hfile_1} ... ${hfile_N}
 pkginclude_HEADERS = \
 	mootFSM.h \
-	mootMorph.h
+	mootMorph.h \
+	mootmConfig.h \
+	mootmUnConfig.h
 
 ## --- no-install headers
 #noinst_HEADERS = nopackage.h
@@ -141,7 +143,8 @@ libmootm_la_LDFLAGS = -version-info $(LIBCUR):$(LIBREV):$(LIBAGE)
 #libmootm_la_LDFLAGS =
 #libmootm_la_LIBADD  = -lFSMExt -lFSM -lFSMSymSpec -lbumble++ @STL_LIBS@ -lz
 
-libmootm_la_LIBADD = @FSMEXT_LIBS@
+#libmootm_la_LIBADD = @FSMEXT_LIBS@
+libmootm_la_LIBADD = @FSM_LIBS@
 
 ##-----------------------------------------------------------------------
 ## Variables: cleanup
