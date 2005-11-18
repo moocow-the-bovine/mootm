@@ -16,7 +16,9 @@ docdir=@docdir@
 pkgdocdir=@pkgdocdir@
 
 cppflags=-I@spkgincludedir@ @CPPFLAGS@
+cxxflags=@CXXFLAGS@
 ldadd=-lmootm @LIBS@
+ldadd_static=@FSM_LDADD_STATIC@
 
 
 Name: @PACKAGE@
@@ -26,4 +28,4 @@ Version: @VERSION@
 #Requires: moot >= 2.0.0, libFSM >= 0.1.0.3, libFSMext >= 0.0.0
 Requires: moot >= 2.0.0, libFSM >= 0.1.1.1
 Libs: -L${libdir} ${ldadd}
-Cflags: ${cppflags}
+Cflags: ${cppflags} ${cxxflags}

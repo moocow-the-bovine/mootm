@@ -37,12 +37,14 @@ lib_LTLIBRARIES = libmootm.la
 #${prog_i}_SOURCES =
 #${lib_i}_la_SOURCES =
 libmootm_la_SOURCES = \
-	mootFSM.cc \
+	mootFSMBase.cc \
+	mootFSMPotsdam.cc \
+	mootFSMRWTH.cc \
 	mootMorph.cc
 
 ## --- Extra (possible) sources
 #EXTRA_${prog_i}_SOURCES = 
-#EXTRA_${lib_i}_la_SOURCES = 
+#EXTRA_LIBMOOTM_LA_SOURCES =
 
 ## --- Additional dependencies
 
@@ -53,10 +55,13 @@ libmootm_la_SOURCES = \
 ## --- installable headers: @includedir@/@pkgname@
 #pkginclude_HEADERS = ${hfile_1} ... ${hfile_N}
 pkginclude_HEADERS = \
-	mootFSM.h \
-	mootMorph.h \
 	mootmConfig.h \
-	mootmUnConfig.h
+	mootmUnConfig.h \
+	mootFSMBase.h \
+	mootFSMPotsdam.h \
+	mootFSMRWTH.h \
+	mootMorph.h
+
 
 ## --- no-install headers
 #noinst_HEADERS = nopackage.h

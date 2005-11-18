@@ -10,6 +10,7 @@
 *.fst
 *.tfst
 *.lab
+*.loT
 mootmConfig.h
 mootmConfig.h.in
 mootPPLexer.cc
@@ -73,3 +74,4 @@ test.*
 *test
 
 pre-gpl
+

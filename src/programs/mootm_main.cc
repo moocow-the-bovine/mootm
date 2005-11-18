@@ -48,6 +48,40 @@ using namespace moot;
 using namespace mootio;
 using namespace mootm;
 
+#ifdef USE_FSM_RWTH
+# define MAIN_C main_c
+# include <Core/Application.hh>
+# include <Fsa/Application.hh>
+
+using namespace Fsa;
+
+APPLICATION
+
+int MAIN_C(int argc, char **argv);
+
+class mootmApplication : public virtual Core::Application, public virtual Fsa::Application {
+public:
+  mootmApplication() {
+    setTitle("mootm");
+    setDefaultLoadConfigurationFile(false);
+  };
+  virtual int main(const std::vector<std::string> &args)
+  {
+    int    argc = args.size()+1;
+    char **argv = (char **)(malloc((args.size()+1)*sizeof(char *)));
+    int    i, status;
+    argv[0] = "mootm";
+    for (i=0; i < (int)args.size(); i++) { argv[i+1] = (char *)args[i].c_str(); }
+    status = MAIN_C(argc,argv);
+    free(argv);
+    return status;
+  };
+} app; //-- class mootmApplication
+
+#else 
+# define MAIN_C main
+#endif // USE_FSM_RWTH
+
 /*--------------------------------------------------------------------------
  * Globals
  *--------------------------------------------------------------------------*/
@@ -56,10 +90,6 @@ char *PROGNAME = "mootm";
 // options & file-churning
 gengetopt_args_info args;
 cmdutil_file_churner churner;
-
-// -- filenames
-char *symfile = NULL;
-char *fstfile = NULL;
 
 // -- files
 mofstream out;
@@ -94,8 +124,8 @@ void GetMyOptions(int argc, char **argv)
   //-- show banner
   if (args.verbose_arg >= vlProgress)
     fprintf(stderr,
-	    "%s version %s by Bryan Jurish <moocow@ling.uni-potsdam.de>\n\n",
-	    PROGNAME, VERSION);
+	    "%s version %s by Bryan Jurish <moocow@ling.uni-potsdam.de>, using %s\n\n",
+	    PROGNAME, VERSION, mootmFSMLibrary);
 
   //-- output file
   if (!out.open(args.output_arg,"w")) {
@@ -114,44 +144,30 @@ void GetMyOptions(int argc, char **argv)
   if (args.verbose_arg >= vlTiming) gettimeofday(&t1, NULL);
 
   //-- mophology object setup: flags
-  morph.want_avm           = args.avm_given;
-  morph.force_reanalysis   = args.reanalyze_given;
-  //morph.want_mabbaw_format = args.mabbaw_given;
-  //morph.do_dequote         = args.dequote_given;
-
+  morph.want_avm               = args.avm_given;
+  morph.force_reanalysis       = args.reanalyze_given;
   morph.first_analysis_is_best = args.first_is_best_given;
   morph.ignore_first_analysis  = args.ignore_first_given;
 
   if      (args.verbose_arg <= vlSilent)   morph.verbose = mootMorph::vlSilent;
-  //else if (args.verbose_arg <= vlErrors)   morph.verbose = mootMorph::vlErrors;
-  //else if (args.verbose_arg <= vlProgress) morph.verbose = mootMorph::vlErrors;
   else if (args.verbose_arg <= vlTiming)   morph.verbose = mootMorph::vlErrors;
   else if (args.verbose_arg <= vlWarnings) morph.verbose = mootMorph::vlWarnings;
   else                                     morph.verbose = mootMorph::vlEverything;
 
   morph.nprogress = args.dots_arg;
 
-  //-- morphology object setup : symbols
-  if (args.verbose_arg >= vlProgress)
-    fprintf(stderr, "%s: loading morphological symbols-file '%s'...", PROGNAME, args.symbols_arg);
-  if (!morph.load_morph_symbols(args.symbols_arg)) {
-    fprintf(stderr,"\n%s: load FAILED for morphological symbols-file '%s'\n",
-	    PROGNAME, args.symbols_arg);
+  //-- morphology object setup
+  if (args.verbose_arg >= vlProgress) {
+    fprintf(stderr, "%s: loading morphology (syms='%s', fst='%s')...",
+	    PROGNAME, args.symbols_arg, args.morph_arg);
+  }
+  if (!morph.load(args.morph_arg, args.symbols_arg)) {
+    fprintf(stderr,"\n%s: load FAILED for morpholgy (syms='%s', fst='%s')!\n",
+	    PROGNAME, args.symbols_arg, args.morph_arg);
     exit(1);
   } else if (args.verbose_arg >= vlProgress) {
-    fprintf(stderr," loaded.\n");
+    fprintf(stderr, " loaded.\n");
   }
-
-  //-- morphology object setup : morphology FST
-  if (args.verbose_arg >= vlProgress)
-    fprintf(stderr, "%s: loading morphological FST '%s'...", PROGNAME, args.morph_arg);
-  if (!morph.load_morph_fst(args.morph_arg)) {
-    fprintf(stderr,"\n%s: load FAILED for morphological FST '%s'\n", PROGNAME, args.morph_arg);
-    exit(1);
-  } else if (args.verbose_arg >= vlProgress) {
-    fprintf(stderr," loaded.\n");
-  }
-
   //-- morphology object setup : tag-extraction FST
   /*
   if (args.tagx_given) {
@@ -175,10 +191,9 @@ void GetMyOptions(int argc, char **argv)
 /*--------------------------------------------------------------------------
  * main
  *--------------------------------------------------------------------------*/
-int main (int argc, char **argv)
+int MAIN_C (int argc, char **argv)
 {
   int nfiles = 0;
-
   GetMyOptions(argc,argv);
 
   // -- get init-stop time = analysis-start time
@@ -187,9 +202,9 @@ int main (int argc, char **argv)
 
   // -- the guts
   if (args.words_given) {
-    //fprintf(out.file, "# %s: Analyzing command-line tokens\n\n", PROGNAME);
-    morph.tag_strings(args.inputs_num, args.inputs, out.file, out.name.c_str());
-  } else {
+    morph.analyze_strings(args.inputs_num, args.inputs, out.file, out.name.c_str());
+  }
+  else {
     // -- big loop
     for (churner.first_input_file(); churner.in.file; churner.next_input_file()) {
       nfiles++;
@@ -202,7 +217,7 @@ int main (int argc, char **argv)
 	      PROGNAME,
 	      churner.in.name.c_str());
 
-      morph.tag_stream(churner.in.file, out.file, churner.in.name.c_str());
+      morph.analyze_stream(churner.in.file, out.file, churner.in.name.c_str());
 
       if (args.verbose_arg >= vlProgress) {
 	fprintf(stderr," done.\n");

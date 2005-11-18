@@ -3,7 +3,7 @@ AC_PREREQ(2.5)
 
 dnl Some handy macros
 define([THE_PACKAGE_NAME],    [mootm])
-define([THE_PACKAGE_VERSION], [2.0.4])
+define([THE_PACKAGE_VERSION], [2.0.5-pre1])
 define([THE_PACKAGE_AUTHOR],  [moocow@ling.uni-potsdam.de])
 
 AC_INIT(THE_PACKAGE_NAME, THE_PACKAGE_VERSION, THE_PACKAGE_AUTHOR)
@@ -114,79 +114,225 @@ AC_CHECK_HEADERS([time.h sys/time.h],
 dnl time headers
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
 dnl ------------------------------------------------------------
-dnl libFSM (pkg-config)
-dnl
-PKG_CHECK_MODULES(FSMLIB, libFSM >= 0.9.0.1,
-	[PC_HAVE_FSMLIB="yes"],
-	[PC_HAVE_FSMLIB=""])
-  
-if test -z "$PC_HAVE_FSMLIB" ; then
+dnl Which FSM lib? : ac_cv_fsm_which = "potsdam" | "rwth"
+
+ac_cv_fsm_which=""
+
+AC_ARG_ENABLE([potsdam-fsm],
+ 	AC_HELP_STRING([--enable-potsdam-fsm],
+ 	               [Use Potsdam libFSM library (default=true if available)]),
+        [want_fsm_potsdam="$enableval"]
+ 	[want_fsm_potsdam="yes"])
+
+AC_ARG_ENABLE([rwth-fsa],
+	AC_HELP_STRING([--enable-rwth-fsa],
+	               [Use RWTH Fsa library (default=true only if libFSM unavailable)]),
+        [want_fsm_rwth="$enableval"]
+	[want_fsm_rwth="yes"])
+
+##-- prefer Potsdam libFSM
+if test "$want_fsm_potsdam" != "no" ; then
+
+ PKG_CHECK_MODULES(FSMLIB, libFSM >= 0.9.0.1,
+	[HAVE_FSMLIB="yes"],
+	[HAVE_FSMLIB=""])
+
+ if test "$HAVE_FSMLIB" != "yes" -a "$want_fsm_rwth" = "no" ; then
     AC_MSG_WARN()
-    AC_MSG_WARN([cannot find libFSM >= 0.9.0.1!])
-    AC_MSG_WARN([is your PKG_CONFIG_PATH set correctly?])
+    AC_MSG_WARN([----------------------------------------------------------])
+    AC_MSG_WARN([             Cannot find libFSM >= 0.9.0.1 !])
+    AC_MSG_WARN()
+    AC_MSG_WARN([        Is your PKG_CONFIG_PATH set correctly?])
+    AC_MSG_WARN([----------------------------------------------------------])
     AC_MSG_WARN()
     AC_MSG_ERROR([Required package not found -- aborting.])
-else
-    ac_cv_fsm_version=`pkg-config --modversion libFSM`
-fi ## test -z "$PC_HAVE_FSMLIB"
+ fi
 
-CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I libFSM`"
-LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L libFSM`"
-FSM_LIBS="`$PKG_CONFIG --libs-only-l libFSM` $LIBS"
+ if test "$HAVE_FSMLIB" = "yes" ; then
+   if test "$want_fsm_rwth" != "yes" ; then
+     ac_cv_fsm_which="potsdam"
+   fi
+ fi
+
+fi # "$want_fsm_potsdam" != "no"
+
+##-- fallback to RWTH libfsa
+if test "$ac_cv_fsm_which" != "potsdam" ; then
+  ac_cv_fsm_which="rwth"
+fi
+
+AC_MSG_CHECKING([which underlying finite-state library to use])
+
+if test "$ac_cv_fsm_which" = "potsdam" ; then
+ AC_MSG_RESULT([Potsdam libFSM])
+ AC_DEFINE([USE_FSM_POTSDAM],1,
+	   [Define this to use the Potsdam libFSM library])
+elif test "$ac_cv_fsm_which" = "rwth" ; then
+ AC_MSG_RESULT([RWTH libFsa])
+ AC_DEFINE([USE_FSM_RWTH],1,
+	   [Define this to use the RWTH Fsa library])
+fi
 
 
-##-- HACK: double-link libFSM as workaround
-##   for libFSM<->libFSMTools interdependence
-##   and libtool hardcore modularity requirement
-AC_ARG_ENABLE(all-static,
-	AC_HELP_STRING([--enable-all-static],
+dnl Which FSM lib?
+dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+dnl ------------------------------------------------------------
+dnl RWTH libfsa
+dnl
+AC_ARG_WITH([rwth-fsa-dir],
+	AC_HELP_STRING([--with-rwth-fsa-dir=DIR],
+	               [Use RWTH Fsa library from DIR (default=search)]),
+        [ac_cv_rwth_fsa_dir="$withval"]
+	[ac_cv_rwth_fsa_dir=""])
+
+if test "$ac_cv_fsm_which" = "rwth" ; then
+  AC_MSG_CHECKING([For RWTH Fsa sources])
+
+  if test -z "$ac_cv_rwth_fsa_dir"; then
+    for bd in .. /usr/lib /usr/local/lib /usr/src /usr/local/src ; do
+      for rwth_dir in $bd/fsa-* ; do
+        if test -e "$rwth_dir/src/Fsa/Alphabet.cc" ; then
+          ac_cv_rwth_fsa_dir="$rwth_dir"
+          break
+        fi
+      done
+      if test -n "$ac_cv_rwth_fsa_dir" ; then
+	break
+      fi
+    done
+  fi ##-- test -z "$ac_cv_rwth_fsa_dir"
+
+  if test -n "$ac_cv_rwth_fsa_dir" ; then
+    AC_MSG_RESULT([found: \`$ac_cv_rwth_fsa_dir'])
+  else
+    AC_MSG_RESULT([not found])
+    AC_MSG_ERROR([cannot locate RWTH Fsa directory -- specify --with-rwth-fsa-dir=DIR],1)
+  fi ##-- test -z "$ac_cv_rwth_fsa_dir"
+
+ RWTH_FSA_DIR="`(cd $ac_cv_rwth_fsa_dir ; pwd)`"
+ RWTH_FSA_CONFIG="`make -C $RWTH_FSA_DIR config`"
+
+ [RWTH_ARCH="`\
+  echo \"$RWTH_FSA_CONFIG\" \
+  | grep '^Processor:' \
+  | perl -pe 's/^[^:]*:\s+//' \
+  `"]
+
+ [RWTH_OS="`\
+  echo \"$RWTH_FSA_CONFIG\" \
+  | grep '^Operating system:' \
+  | perl -pe 's/^[^:]*:\s+//' \
+  `"]
+
+ [RWTH_VERSION_FULL="`\
+  echo \"$RWTH_FSA_CONFIG\" \
+  | grep '^Version:' \
+  | perl -pe 's/^[^:]*:\s+//' \
+  `"]
+ [RWTH_VERSION=`echo "$RWTH_VERSION_FULL" | perl -pe 's/\s+-\s+.*$//'`]
+ [RWTH_CVERSION=`echo "$RWTH_VERSION_FULL" | perl -pe 's/^.*\s+-\s+//'`]
+
+ [RWTH_CPPFLAGS="`\
+  echo \"$RWTH_FSA_CONFIG\" \
+  | grep '^Preprocessor flags:' \
+  | perl -p -e 's/^[^:]*:\s*//;' -e \"s|-I\.|-I$RWTH_FSA_DIR|g;\" \
+  `"]
+
+ [RWTH_CFLAGS="`\
+  echo \"$RWTH_FSA_CONFIG\" \
+  | grep '^C compiler flags:' \
+  | perl -p -e 's/^[^:]*:\s+//;' -e \"s|-I\.|-I$RWTH_FSA_DIR|g;\" \
+  `"]
+
+ [RWTH_CXXFLAGS="`\
+  echo \"$RWTH_FSA_CONFIG\" \
+  | grep '^C\+\+ compiler flags:' \
+  | perl -p -e 's/^[^:]*:\s+//;' -e \"s|-I\.|-I$RWTH_FSA_DIR|g;\" \
+  `"]
+
+ [RWTH_LDFLAGS_FULL="`\
+  echo \"$RWTH_FSA_CONFIG\" \
+  | grep '^Linker flags:' \
+  | perl -p -e 's/^[^:]*:\s+//;' -e \"s|-L\.|-L$RWTH_FSA_DIR|g;\" \
+  `"]
+
+ RWTH_LDFLAGS=""
+ RWTH_LIBS=""
+ for f in $RWTH_LDFLAGS_FULL ; do
+   case "$f" in
+    -l*)
+      RWTH_LIBS="$RWTH_LIBS $f"
+      ;;
+    -L*)
+      RWTH_LDFLAGS="$RWTH_LDFLAGS $f"
+      ;;
+    *)
+      ##-- ignore 'em (-rdynamic)
+      ;;
+   esac
+ done
+
+ [CPPFLAGS="$CPPFLAGS $RWTH_CPPFLAGS"]
+ [LDFLAGS="$LDFLAGS $RWTH_LDFLAGS"]
+
+ RWTH_OBJS="\
+  $RWTH_FSA_DIR/src/Fsa/libSprintFsa.$RWTH_OS-$RWTH_ARCH-$RWTH_CVERSION.a \
+  $RWTH_FSA_DIR/src/Core/libSprintCore.$RWTH_OS-$RWTH_ARCH-$RWTH_CVERSION.a \
+  "
+
+ FSM_LIBS="$FSM_LIBS $RWTH_LIBS"
+ FSM_LDADD_STATIC="$RWTH_OBJS"
+
+fi ##-- ac_cv_fsm_which = "rwth"
+
+dnl libfsa (rwth)
+dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+dnl ------------------------------------------------------------
+dnl libFSM (flags, etc)
+dnl
+if test "$ac_cv_fsm_which" = "potsdam" ; then
+
+ #ac_cv_fsm_version="`pkg-config --modversion libFSM`"
+
+
+ CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I libFSM`"
+ LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L libFSM`"
+ FSM_LIBS="`$PKG_CONFIG --libs-only-l libFSM` $LIBS"
+
+ ##-- HACK: double-link libFSM as workaround
+ ##   for libFSM<->libFSMTools interdependence
+ ##   and libtool hardcore modularity requirement
+ AC_ARG_ENABLE([all-static],
+ 	AC_HELP_STRING([--enable-all-static],
 	               [Build standalone static binary]),
 	[ac_cv_enable_all_static="$enableval"],[ac_cv_enable_all_static="no"])
 
-#FSM_LIBS="$FSM_LIBS -lFSM"
-if test "$ac_cv_enable_all_static" = "yes" ; then
+ #FSM_LIBS="$FSM_LIBS -lFSM"
+ if test "$ac_cv_enable_all_static" = "yes" ; then
    FSM_LDADD_STATIC="-lFSMStaticHack"
    LDFLAGS="-all-static $LDFLAGS"
-fi
+ fi
 
-AC_SUBST(FSM_LIBS)
-AC_SUBST(FSM_LDADD_STATIC)
-
+fi ##-- test "$ac_cv_fsm_which" = "potsdam"
 
 dnl libFSM
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-# ------------------------------------------------------------
-# FSM_API_REVISION
-case "$ac_cv_fsm_version" in
-  0.1.0.*)
-    AC_MSG_NOTICE([Configuring for elderly FSM version 0.1.0.*])
-    FSM_API_REVISION=0
-    ;;
-
-  0.1.1.*)
-    FSM_API_REVISION=1
-    ;;
-
-  *)
-    ##-- default to API 1
-    FSM_API_REVISION=1
-    ;;
-esac
-dnl /FSM_API_REVISION
-dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 dnl ------------------------------------------------------------
 dnl libFSM (defines)
-AC_DEFINE([HAVE_LIBFSM],1,
-	[Define this to use Thomas Hanneforth's libFSM])
-AC_DEFINE_UNQUOTED([FSM_API_REVISION], $FSM_API_REVISION,
-	[The revision of your libFSM API])
+
+AC_SUBST(FSM_LIBS)
+AC_SUBST(FSM_LDADD_STATIC)
 
 dnl libFSM (defines)
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 dnl vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 dnl libmoot
@@ -196,6 +342,7 @@ PKG_CHECK_MODULES(MOOT, moot >= 2.0.0,
   
 if test -n "$PC_HAVE_MOOT" ; then
     CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I moot`"
+    CXXFLAGS="$CXXFLAGS `$PKG_CONFIG --cflags-only-other moot`"
     LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L moot`"
     LIBS="$LIBS `$PKG_CONFIG --libs-only-l moot`"
 else
@@ -207,9 +354,10 @@ else
     AC_MSG_WARN([----------------------------------------------------------])
     AC_MSG_WARN()
     AC_MSG_ERROR([Required package not found -- aborting.])
-fi ## test -n "$PC_HAVE_MOOT"
-    
 
+fi ## test -n "$PC_HAVE_MOOT"
+
+dnl moot
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
@@ -475,9 +623,9 @@ AC_SUBST(mootm_OFLAGS)
 
 
 dnl ---------------------------------------------------------------
-dnl cxxflags: template depth
+dnl cxxflags: template depth (should be handled by moot)
 dnl
-CXXFLAGS="$CXXFLAGS -ftemplate-depth-24"
+dnl CXXFLAGS="$CXXFLAGS -ftemplate-depth-24"
 dnl
 dnl cxxflags: template depth
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -20,26 +20,34 @@
 */
 
 /*----------------------------------------------------------------------
- * Name: mootFSM.h
+ * Name: mootFSMBase.h
  * Author: Bryan Jurish <moocow@ling.uni-potsdam.de>
  * Description:
  *   + moot FSMs: abstract base class
  *----------------------------------------------------------------------*/
 /**
- * \file mootFSM.h
+ * \file mootFSMBase.h
  * \brief Abstract base class for mootm morphology automata.
  * \detail May define placebo classes, etc. if HAVE_LIBFSM is not defined
  */
 
-#ifndef _moot_FSM_H
-#define _moot_FSM_H
+#ifndef _moot_FSM_BASE_H
+#define _moot_FSM_BASE_H
 
 #ifdef HAVE_CONFIG_H
 # include <mootmUnConfig.h>
 # include <mootmConfig.h>
 #endif
 
-#include <stdio.h>
+#ifdef USE_FSM_POTSDAM
+  /* use hash<std::string> from libFSM */
+# define MOOT_HAVE_HASH_STRING
+#endif
+
+#include <mootmUnConfig.h>
+
+
+#include <string>
 #include <mootToken.h>
 
 namespace mootm {
@@ -48,33 +56,30 @@ namespace mootm {
 
   /**
    * \brief Abstract base class for finite-state transducers.
+   * \detail Really just an API specification
    */
-  class mootFSM {
+  class mootFSMBase {
   public:
     /*------------------------------------------------------------
      * public methods
      */
     /** Default constructor */
-    virtual mootFSM(void) {};
+    mootFSMBase(void) {};
 
     /** Default destructor */
-    virtual ~mootFSM(void) {};
+    virtual ~mootFSMBase(void) {};
 
     /** Load a morphology FST (& symbols) */
-    virtual bool load(const char *fstfile, const char *symfile=NULL)
-    { dummy("load"); };
-
-    /** Analyze a single mootToken */
-    virtual mootFSM analyze_token(const mootToken &tok)
-    { dummy("analyze_token"); };
+    virtual bool load(const string &fstfile, const string &symfile="")
+    { dummy("load"); return false; };
 
     /** Return true if this is a valid object */
     virtual bool valid(void) const
     { return false; };
 
-    /** Serialize to a mootToken */
-    virtual mootToken &to_token(mootToken &tok, bool want_avm=true, int verbose=0)
-    { dummy("to_token"); };
+    /** Analyze a single mootToken in-place */
+    virtual mootToken& analyze_token(mootToken &tok, bool want_avm=true, bool want_warnings=true)
+    { dummy("analyze_token"); return tok; }
 
   public:
     /*------------------------------------------------------------
@@ -82,15 +87,18 @@ namespace mootm {
      */
     void dummy(const char *name="?")
     {
-      self->carp("mootFSM::%s(): dummy method called -- exiting.\n", name);
+      this->carp("mootFSM::%s(): dummy method called -- exiting.\n", name);
       abort();
     };
 
     /** Error reporting */
     void carp(char *fmt, ...) const;
+  }; // class mootFSMBase
 
-  }; // class mootFSM
+
+  /** Name of the underlying FSM library */
+  extern const char *mootmFSMLibrary;
 
 }; // namespace mootm
 
-#endif /* _moot_FSM_H */
+#endif /* _moot_FSM_BASE_H */

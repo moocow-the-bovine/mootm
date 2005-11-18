@@ -1,16 +1,10 @@
 /* src/libmootm/mootmConfig.h.in.  Generated from configure.in by autoheader.  */
 
-/* The revision of your libFSM API */
-#undef FSM_API_REVISION
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
-
-/* Define this to use Thomas Hanneforth's libFSM */
-#undef HAVE_LIBFSM
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -65,6 +59,12 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* Define this to use the Potsdam libFSM library */
+#undef USE_FSM_POTSDAM
+
+/* Define this to use the RWTH Fsa library */
+#undef USE_FSM_RWTH
 
 /* Version number of package */
 #undef VERSION

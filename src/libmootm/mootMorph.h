@@ -2,7 +2,7 @@
 
 /*
    libmootm : moocow's morphology library
-   Copyright (C) 2003-2004 by Bryan Jurish <moocow@ling.uni-potsdam.de>
+   Copyright (C) 2003-2005 by Bryan Jurish <moocow@ling.uni-potsdam.de>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -41,17 +41,15 @@
 #define MOOT_HAVE_HASH_STRING
 
 #include <stdio.h>
-#include <mootFSM.h>
+
 #include <mootToken.h>
 #include <mootTokenIO.h>
 
-#ifdef HAVE_CONFIG_H
-# include <mootmUnConfig.h>
-# include <mootmConfig.h>
-#endif
+#include <mootFSMBase.h>
+#include <mootFSMPotsdam.h>
+#include <mootFSMRWTH.h>
 
 namespace mootm {
-
   using namespace std;
   using namespace moot;
 
@@ -60,27 +58,10 @@ namespace mootm {
  *--------------------------------------------------------------------------*/
 
 /**
- * \brief High-level class for libFSM morphological analyzers.
+ * \brief High-level class for morphological analyzers.
  */
 class mootMorph {
 public:
-  /*------------------------------------------------------------
-   * public typedefs
-   */
-  /** Single POS tag, without features */
-  typedef FSMSymbol Tag;
-
-  /** Single POS tag string, with or without features */
-  typedef FSMSymbolString TagString;
-
-  /** Single morphological analysis, including features */
-  typedef FSM::FSMWeightedSymbolVector MorphAnalysis;
-
-  /** Set of morphological analyses, including features */
-  typedef set<MorphAnalysis> MorphAnalysisSet;
-
-  /** Set of POS tag strings, with or without features */
-  typedef set<FSMSymbolString> TagStringSet;
 
   /** Some handy values for the 'verbose' flag */
   typedef enum {
@@ -94,14 +75,9 @@ public:
   /*------------------------------------------------------------
    * public data : guts
    */
-  /// \name Guts
+  /// \name Ye Olde Guts
   //@{
-  /**
-   * The symspec to use for morphological analysis (and tag-extraction).
-   */
-  FSMSymSpec *syms;
-    
-  /** Morphology FST \f$T_{morph}\f$ to use for analysis:
+  /** Underlying finite state transducer to use for analysis:
       \f[
         \begin{eqnarray*}
           Morph(w) &:=& \pi_{2}(ID_w \circ T_{morph})\cr
@@ -112,19 +88,9 @@ public:
       \warning The analyzer FST \f$T_{morph}\f$ may not contain any input epsilon cycles!
       \warning The analysis FSAs \f$Morph(w)\f$ may not contain any epsilon cycles!
   */
-  FSM *mfst;
+  mootFSM mfsm;
   //@}
 
-
-  /*------------------------------------------------------------
-   * public data : filenames
-   */
-  /// \name Filenames
-  /// Used for mootCHMM binary model load/save.
-  //@{
-  string syms_filename;  /**< Name of the symbols-file (for "binary" save) */
-  string mfst_filename;  /**< Name of the FST-file (for "binary" save) */
-  //@}
 
   /*------------------------------------------------------------
    * public data : flags
@@ -134,12 +100,6 @@ public:
   //@{
   /** Generate output strings in AVM (madwds-"vector") mode? (default = false) */
   bool want_avm;
-
-  /*
-   * Generate output strings in old MA-BBAW format? (default = false)
-   * OBSOLETE.
-   */
-  //bool want_mabbaw_format;
 
   /** Force re-analysis of pre-analyzed tokens? (default = false) */
   bool force_reanalysis;
@@ -153,9 +113,7 @@ public:
    */
   bool ignore_first_analysis;
   
-  /** verbosity level (0..2)
-   * \see mootMorph::VerbosityLevel
-   */
+  /** verbosity */
   int verbose;
   //@}
   
@@ -181,49 +139,6 @@ public:
   unsigned int nprogress;
   //@}
 
-protected:
-  /*------------------------------------------------------------
-   * protected data : flags
-   */
-
-  /** \name Houskeeping flags */
-  //@{
-  bool i_made_syms;
-  bool i_made_mfst;
-  //@}
-
-protected:
-  /*------------------------------------------------------------
-   * protected data : temporaries
-   */
-
-  /** \name Pre-allocated temporaries */
-  //@{
-  /** pre-allocated temporary: morphological analysis output FSA */
-  FSM *result, *tmp, *tmpx;
-  /** pre-allocated temporary: current token */
-  FSMSymbolString curtok_s;
-  /* pre-allocated temporary: current token */
-  //char *curtok;
-
-  /** pre-allocated temporary: morphological analysis output (for tag_token()) */
-  MorphAnalysisSet analyses;
-
-  /** pre-allocated temporaries: morphological analysis output (for extrac_tags() HACK) */
-  MorphAnalysisSet xanalyses, xxanalyses;
-
-  /** pre-allocated temporary: for analysess-strings conversion */
-  MorphAnalysisSet::const_iterator anlsi;
-
-  /** pre-allocated temporary: for print_token_analyses() */
-  FSMSymbolString analysis_str;
-
-  /** hack: for FSMSymbolSpec: error messages */
-  list<string> syms_msgs;
-
-  /** pre-allocated temporary: for analysisStrings() */
-  TagStringSet analysis_strings;
-  //@}
 
 public:
   /*------------------------------------------------------------
@@ -233,11 +148,7 @@ public:
   /** \name Construction / Destruction */
   //@{
   /** constructor */
-  mootMorph(FSMSymSpec *mysyms=NULL, FSM *myfst=NULL) :
-    syms(mysyms), 
-    mfst(myfst),
-    syms_filename("mootMorph.sym"),
-    mfst_filename("mootMorph.fst"),
+  mootMorph(void) :
     want_avm(false),
     force_reanalysis(false),
     first_analysis_is_best(false),
@@ -246,399 +157,80 @@ public:
     ntokens(0),
     nanalyzed(0),
     nunknown(0),
-    nprogress(0),
-    i_made_syms(false),
-    i_made_mfst(false),
-    result(NULL),
-    tmp(new FSM()),
-    tmpx(new FSM())
+    nprogress(0)
   {};
 
   /** destructor */
-  ~mootMorph();
+  ~mootMorph() {};
   //@}
 
   /*------------------------------------------------------------
    * public methods: initialization
    */
 
-  /** Low-level FSTfile loading utility */
-  FSM *load_fsm_file(const char *fsm_file, FSM **fsm, bool *i_made_fsm=NULL);
-
   /** \name Initialization */
   //@{
-  /** Load morphological symbols-file, "filename" defaults to 'syms_filename' */
-  FSMSymSpec *load_morph_symbols(const char *filename=NULL);
 
-  /** Load morphology FST, 'filename' defaults to 'mfst_filename' */
-  FSM *load_morph_fst(const char *filename=NULL)
-  {
-    if (filename) mfst_filename = (const char *)filename;
-    if (load_fsm_file(mfst_filename.c_str(), &mfst, &i_made_mfst))
-      {
-	if (syms) {
-#if FSM_API_REVISION == 0
-	  mfst->fsm_use_symbol_spec(syms);
-#else /* FSM_API_REVISION != 0 */
-	  mfst->fsm_use_symbol_spec(*syms);
-#endif /* FSM_API_REVISION */
-	}
-      }
-    return mfst;
-  };
+  /** Load morphology transducer: syms_filename is requird for Uni-Potsdam libFSM */
+  bool load(const string &fst_filename, const string &syms_filename="")
+  { return mfsm.load(fst_filename, syms_filename); };
+
+  /** Returns true if this is a valid object */
+  bool valid(void) const
+  { return mfsm.valid(); };
+
   //@}
 
   /*------------------------------------------------------------
-   * public methods: top-level: tagging utilities
+   * public methods: top-level: analysis utilities
    */
 
-  /** \name Tagging: Top-level */
+  /** \name Analysis: Top-level */
   //@{
-  /** Top-level: tag tokens from a C-stream */
-  bool tag_io(TokenReader *reader, TokenWriter *writer);
 
   /** Top-level: tag tokens from a C-stream */
-  bool tag_stream(FILE *in=stdin, FILE *out=stdout, const char *srcname=NULL)
-  {
-    int ifmt = ignore_first_analysis  ? tiofWellDone : tiofMediumRare;
-    int ofmt = first_analysis_is_best ? tiofWellDone : tiofMediumRare;
-    //tr.lexer.ignore_first_analysis = ignore_first_analysis;
-    TokenReaderNative tr(ifmt);
-    TokenWriterNative tw(ofmt);
-    tr.from_file(in);
-    tw.to_file(out);
-    if (srcname) tr.reader_name(srcname);
-    return tag_io(&tr,&tw);
-  };
+  bool analyze_io(TokenReader *reader, TokenWriter *writer);
+
+  /** Top-level: tag tokens from a C-stream */
+  bool analyze_stream(FILE *in=stdin, FILE *out=stdout, const char *srcname=NULL);
 
   /** Top-level: tag a C-array of token-strings */
-  bool tag_strings(int argc, char **argv, FILE *out=stdout, const char *srcname=NULL);
-  //@}
-
-  /*------------------------------------------------------------
-   * public methods: analysis
-   */
-
-  /** \name Analysis */
-
-  //@{
-  /**
-   * mid-level tagging utility: tag a single token
-   * 'token' defaults to 'curtok_s'.
-   * Clears, populates, and returns 'analyses'.
-   *
-   * Don't even THINK about calling this method unlesss
-   * can_tag() returns true.
-   *
-   * DEPRECATED: use analyze_token(mootToken &) instead.
-   */
-  inline const MorphAnalysisSet &tag_token(const char *token)
-  {
-    curtok_s = (const char *)token;
-    return tag_token();
-  };
-
+  bool analyze_strings(int argc, char **argv, FILE *out=stdout, const char *srcname=NULL);
 
   /**
-   * mid-level tagging utility: tag a single token.
-   * Clears, populates, and returns 'analyses'.
-   *
-   * Don't even THINK about calling this method unlesss
-   * can_tag() returns true.
-   *
-   * DEPRECATED: use analyze_token(mootToken &) instead.
-   */
-  inline const MorphAnalysisSet &tag_token(const mootTokString &tok)
-  {
-    curtok_s = tok;
-    return tag_token();
-  };
-
-  /**
-   * mid-level tagging utility: tag the current token 'curtok_s'.
-   * Clears, populates, and returns 'analyses'.
-   *
-   * Don't even THINK about calling this method unlesss
-   * can_tag() returns true.
-   *
-   * DEPRECATED: use analyze_token(mootToken &) instead.
-   */
-  inline const MorphAnalysisSet &tag_token(void)
-  {
-    //-- analyze
-    tmp->fsm_clear();
-    if (!result) result = new FSM();
-    *result = mfst->fsm_lookup(curtok_s, tmp, true);
-
-    //-- serialize, NOT extracting tags
-    analyses.clear();
-
-    //-- just serialize
-    tmp->fsm_symbol_vectors(analyses, false);
-
-    //-- track statistics
-    nanalyzed++;
-    if (analyses.empty()) nunknown++;
-
-    //-- check for errors (hack)
-    check_symspec_messages();
-
-    return analyses;
-  };
-
-  /**
-   * high-level tagging utility: analyse the mootToken 'tok'.
+   * Mid-level analysis utility: analyze a mootToken in-place.
    * Note that any previous analyses in 'tok' are NOT cleared.
    *
    * Don't even THINK about calling this method unlesss
    * can_tag() returns true.
+   *
    */
-  inline void analyze_token(mootToken &tok)
+  inline mootToken& analyze_token(mootToken &tok)
   {
-    tag_token(tok.text()); //-- populate mootMorph instance datum 'analyses'
+    //-- analyze
+    mfsm.analyze_token(tok);
 
-    //-- add analyses to token
-    for (anlsi = analyses.begin(); anlsi != analyses.end(); anlsi++) {
-      mootToken::Analysis analysis;
+    //-- track statistics
+    nanalyzed++;
+    if (tok.analyses().empty()) nunknown++;
 
-      //-- "output" string is an extracted tag, if it is present
-      if (!anlsi->ostr.empty()) {
-	symbol_vector_to_string(anlsi->ostr, analysis.tag);
-	symbol_vector_to_string(anlsi->istr, analysis.details);
-      }
-      else {
-	symbol_vector_to_string(anlsi->istr, analysis.tag);
-      }
-
-#if 0
-# if FSM_API_REVISION == 0
-      analysis.cost = anlsi->weight;
-# else // FSM_API_REVISION != 0
-      analysis.cost = anlsi->weight.weight();
-# endif // FSM_API_REVISION
-#endif
-      tok.insert(analysis);
-    }
+    return tok;
   };
+
   //@}
 
 
+
+
   /*------------------------------------------------------------
-   * public methods: sanity checking
+   * public methods: Miscellany
    */
-  /** \name Sanity checking */
+  /** \name Miscellany */
   //@{
-  /** tagging utility: sanity check */
-  inline bool can_tag(void) const
-  {
-    return (syms && mfst && *mfst);
-  }
-  //@}
 
-
-  /*------------------------------------------------------------
-   * public methods: tagging utilities: string-generation
-   */
-
-  /** \name Stringification / Output */
-  //@{
-  /**
-   * Tagging utility: stringify a single token analysis-set.
-   */
-  inline TagStringSet &analyses_to_strings(MorphAnalysisSet *anls = NULL)
-  {
-    if (!anls) anls = &analyses;
-    analysis_strings.clear();
-    for (anlsi = anls->begin(); anlsi != anls->end(); anlsi++) {
-      //-- stringify this analysis
-      analysis_str.clear();
-      symbol_vector_to_string(anlsi->istr, analysis_str);
-      analysis_strings.insert(analysis_str);
-    }
-    return analysis_strings;
-  };
-
-  /*------------------------------------------------------------
-   * public methods: tagging utilities: output
-   */
-
-  /**
-   * Convert a MorphAnalysisSet (default=current analyses) to a mootToken.
-   *
-   * Probablity not needed.
-   */
-  inline void analyses2mtoken(MorphAnalysisSet *anls = NULL,
-			      mootToken *tok = NULL)
-  {
-    if (!anls) anls = &analyses;
-    for (anlsi = anls->begin(); anlsi != anls->end(); anlsi++) {
-      mootToken::Analysis toka;
-
-      //-- use "input" string for 'details'
-      symbol_vector_to_string(anlsi->istr, toka.details);
-
-      //-- use "output string" to instantiate 'tag' (only works if we've extracted the tag!)
-      if (!anlsi->ostr.empty()) {
-	symbol_vector_to_string(anlsi->ostr, toka.tag);
-      } else {
-	//-- use the whole analysis as the tag (probably wrong!)
-	toka.tag.swap(toka.details);
-      }
-
-      //-- copy weight as 'cost'
-#if 0
-# if FSM_API_REVISION == 0
-      toka.cost = anlsi->weight;
-# else // FSM_API_REVISION != 0
-      toka.cost = anlsi->weight.weight();
-# endif // FSM_API_REVISION
-#endif
-
-      //-- insert analysis
-      tok->insert(toka);
-    }
-  };
-
-
-  /*
-   * Prints analyses to the specified output stream.
-   * @param out Defaults to 'stdout'
-   * @param token Defaults to current token 'curtok'
-   * @param anls Defaults to current analyses 'analyses'
-   *
-   * OBSOLETE
-   */
-  /*
-  inline void print_token_analyses(FILE *out = stdout,
-				   const char *token = NULL,
-				   MorphAnalysisSet *anls = NULL)
-  {
-    if (!anls) anls = &analyses;
-    
-    fputs(token ? token : curtok_s.c_str(), out);
-    if (want_mabbaw_format) {
-      //-- ambiguous, strings, all features, mabbaw-style
-      fprintf(out, ": %d Analyse(n)\n", anls->size());
-      for (anlsi = anls->begin(); anlsi != anls->end(); anlsi++) {
-	//-- print separator
-	fputc('\t', out);
-
-	//-- print "output" string if present (it might be an extracted tag)
-	if (!anlsi->ostr.empty()) {
-	  analysis_str.clear();
-	  symbol_vector_to_string(anlsi->ostr, analysis_str);
-	  fputs(analysis_str.c_str(), out);
-	  fputc(':', out);
-	}
-
-	//-- always print "input" string
-	analysis_str.clear();
-	symbol_vector_to_string(anlsi->istr, analysis_str);
-	fputs(analysis_str.c_str(), out);
-
-	//-- print weight
-	fprintf(out, (anlsi->weight ? "\t<%f>\n" : "\n"), anlsi->weight);
-      }
-      fputc('\n', out);
-    } else { //-- want_mabbaw_format
-       //-- ambiguous, strings, all features, one tok/line 
-      for (anlsi = anls->begin(); anlsi != anls->end(); anlsi++) {
-	//-- print separator
-	fputc('\t', out);
-
-	//-- print "output string" if present (it might be an extracted tag)
-	if (!anlsi->ostr.empty()) {
-	  analysis_str.clear();
-	  symbol_vector_to_string(anlsi->ostr, analysis_str);
-	  fputs(analysis_str.c_str(), out);
-	  fputc(':', out);
-	}
-
-	//-- always print "input" string
-	analysis_str.clear();
-	symbol_vector_to_string(anlsi->istr, analysis_str);
-	fputs(analysis_str.c_str(), out);
-
-	//-- print weight
-	if (anlsi->weight) fprintf(out, "<%f>", anlsi->weight);
-      }
-      fputc('\n',out);
-    }
-  };*/
-
-
-  /*------------------------------------------------------------
-   * public methods: low-level: tagging utilities: conversion
-   */
-
-  /** Convert symbol-vectors to pretty strings: general */
-  inline void symbol_vector_to_string(const vector<FSMSymbol> &vec, FSMSymbolString &str) const
-  {
-    syms->symbol_vector_to_string(vec, str, want_avm, verbose >= vlWarnings);
-  };
-  //@}
-
-
-  /*------------------------------------------------------------
-   * public methods: low-level: errors/warnings
-   */
-  /** \name Errors / Warnings */
-  //@{
-  /**
-   * Hack: check, print, & clear messages associated with our FSMSymSpec
-   * We have to keep calling this, otherwise FSMSymSpec would eventually
-   * grab all available memory (argh).
-   *
-   * \warning this only works right if you let mootMorph create
-   * its own FSMSymSpec, due to a re-introduced privatization
-   * bug in FSMSymSpec.
-   */
-  inline void check_symspec_messages(void)
-  {
-    if (!syms_msgs.empty()) {
-      if (verbose >= vlWarnings) {
-	for (list<string>::const_iterator e = syms_msgs.begin();
-	     e != syms_msgs.end();
-	     e++)
-	  {
-	    carp("%s\n",e->c_str());
-	  }
-      }
-      syms_msgs.clear();
-    }
-  };
-
-  /** Error reporting */
+  /** Report an error */
   void carp(char *fmt, ...) const;
-  //@}
 
-
-  /*------------------------------------------------------------
-   * public methods: debugging
-   */
-  /** \name Debugging */
-  //@{
-
-  /** Print a string to stdout */
-  void printstr(const string &s) {
-    fputs(s.c_str(), stdout);
-  };
-
-  /** Convert a symbol-vector to a numeric string */
-  //string symbol_vector_to_string_n(const FSM::FSMSymbolVector &v);
-  string symbol_vector_to_string_n(const FSMSymbolVector &v);
-
-  /** Stringify a token-analysis-set (weighted-vector version) */
-  string analyses_to_string(const set<FSM::FSMWeightedSymbolVector> &analyses);
-
-  /** Stringify a token-analysis-set (weighted-string-version) */
-  string analyses_to_string(const set<FSM::FSMStringWeight> &analyses);
-
-  /** Stringify a token-analysis-set (numeric-tags version) */
-  string analyses_to_string(const set<FSMSymbol> &analyses);
-
-  /** Stringify a token-analysis-set (string-tags version) */
-  string analyses_to_string(const set<FSMSymbolString> &analyses);
   //@}
 };
 
