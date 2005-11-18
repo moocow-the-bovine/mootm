@@ -53,8 +53,6 @@ namespace mootm {
   bool mootFSMRWTH::load(const string &fstfile, const string &symfile)
   {
     mfstr = read(fstfile);
-    linfsa->setSemiring(mfstr->semiring());
-    linfsa->setInputAlphabet(mfstr->getInputAlphabet());
     return mfstr;
   };
 
@@ -68,6 +66,11 @@ namespace mootm {
       istr.push_back(' ');
     }
     iss.str(istr);
+
+    StorageAutomaton *linfsa = new StaticAutomaton();
+    linfsa->setSemiring(mfstr->semiring());
+    linfsa->setInputAlphabet(mfstr->getInputAlphabet());
+
     readLinear(linfsa,iss);
 
     //-- compose, trim

@@ -152,9 +152,7 @@ namespace mootm {
     ConstAutomatonRef mfstr;     /**< Morph transducer as a ConstAutomatonRef */
 
 
-    istringstream     iss;              /**< dummy input stream for readLinear() */
-    StorageAutomaton  *linfsa;          /**< input automaton */
-
+    istringstream      iss;             /**< dummy input stream for readLinear() */
     ConstAutomatonRef result;           /**< Result of morphological transduction */
     set<WeightedLabelVectorPair> paths; /**< pre-allocated temporary */
 
@@ -164,16 +162,11 @@ namespace mootm {
      * public methods
      */
     /** Default constructor */
-    mootFSMRWTH(void)
-    {
-      linfsa = new StaticAutomaton();
-    };
+    mootFSMRWTH(void) {};
 
     /** Default destructor */
     virtual ~mootFSMRWTH(void)
-    {
-      if (linfsa) delete linfsa;
-    };
+    {};
 
     /** Load a morphology FST
      *  (no support for extra symbols here
