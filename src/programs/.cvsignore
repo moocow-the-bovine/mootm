@@ -67,3 +67,4 @@ data
 *.123
 *.lex
 *.log
+tmp
