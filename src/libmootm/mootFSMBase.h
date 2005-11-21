@@ -96,9 +96,6 @@ namespace mootm {
   }; // class mootFSMBase
 
 
-  /** Name of the underlying FSM library */
-  extern const char *mootmFSMLibrary;
-
 }; // namespace mootm
 
 #endif /* _moot_FSM_BASE_H */

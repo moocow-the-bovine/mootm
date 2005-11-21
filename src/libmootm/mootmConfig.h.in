@@ -39,6 +39,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Human-readable name of the underlying finite-state library */
+#undef MOOTM_FSM_LIBRARY
+
 /* Name of package */
 #undef PACKAGE
 
@@ -60,10 +63,13 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* Define this to use the GNU libgfsm library */
+#undef USE_FSM_GFSM
+
 /* Define this to use the Potsdam libFSM library */
 #undef USE_FSM_POTSDAM
 
-/* Define this to use the RWTH Fsa library */
+/* Define this to use the RWTH libFsa library */
 #undef USE_FSM_RWTH
 
 /* Version number of package */

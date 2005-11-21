@@ -47,6 +47,7 @@
 
 #include <mootFSMBase.h>
 #include <mootFSMPotsdam.h>
+#include <mootFSMgfsm.h>
 #include <mootFSMRWTH.h>
 
 namespace mootm {
@@ -208,7 +209,7 @@ public:
   inline mootToken& analyze_token(mootToken &tok)
   {
     //-- analyze
-    mfsm.analyze_token(tok);
+    mfsm.analyze_token(tok, want_avm, (verbose >= vlWarnings));
 
     //-- track statistics
     nanalyzed++;

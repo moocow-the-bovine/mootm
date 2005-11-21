@@ -45,9 +45,6 @@ namespace mootm {
   using namespace moot;
   using namespace Fsa;
 
-  /*------------------------------------------------------------------------*/
-  const char *mootmFSMLibrary = "RWTH libFsa";
-
 
   /*------------------------------------------------------------------------*/
   bool mootFSMRWTH::load(const string &fstfile, const string &symfile)

@@ -125,7 +125,7 @@ void GetMyOptions(int argc, char **argv)
   if (args.verbose_arg >= vlProgress)
     fprintf(stderr,
 	    "%s version %s by Bryan Jurish <moocow@ling.uni-potsdam.de>, using %s\n\n",
-	    PROGNAME, VERSION, mootmFSMLibrary);
+	    PROGNAME, VERSION, MOOTM_FSM_LIBRARY);
 
   //-- output file
   if (!out.open(args.output_arg,"w")) {

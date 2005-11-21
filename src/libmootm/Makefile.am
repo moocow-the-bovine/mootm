@@ -39,6 +39,7 @@ lib_LTLIBRARIES = libmootm.la
 libmootm_la_SOURCES = \
 	mootFSMBase.cc \
 	mootFSMPotsdam.cc \
+	mootFSMgfsm.cc \
 	mootFSMRWTH.cc \
 	mootMorph.cc
 
@@ -59,6 +60,7 @@ pkginclude_HEADERS = \
 	mootmUnConfig.h \
 	mootFSMBase.h \
 	mootFSMPotsdam.h \
+	mootFSMgfsm.h \
 	mootFSMRWTH.h \
 	mootMorph.h
 

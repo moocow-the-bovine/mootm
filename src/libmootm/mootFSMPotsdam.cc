@@ -46,9 +46,6 @@ namespace mootm {
   using namespace moot;
 
   /*------------------------------------------------------------------------*/
-  const char *mootmFSMLibrary = "Potsdam libFSM";
-
-  /*------------------------------------------------------------------------*/
   bool mootFSMPotsdam::load(const string &fstfile, const string &symfile)
   {
     bool rc=true;
