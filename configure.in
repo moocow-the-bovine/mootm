@@ -134,17 +134,17 @@ dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 dnl ------------------------------------------------------------
-dnl Which FSM lib? : ac_cv_fsm_which = "potsdam" | "gfsm" | "rwth"(broken)
+dnl Which FSM lib? : ac_cv_fsm_which = "gfsm" | "potsdam" | "rwth"(broken)
 
-ac_cv_fsm_try="potsdam,gfsm,rwth"
+ac_cv_fsm_try="gfsm,potsdam,rwth"
 ac_cv_fsm_which=""
 
 
 AC_ARG_WITH([fsm],
 	AC_HELP_STRING([--with-fsm=WHICH...],
 		       [Specify comma-separated search order for underlying finite-state library.
-		        Known values: "potsdam", "gfsm", "rwth".
-			Default="potsdam,gfsm,rwth"
+		        Known values: "gfsm", "potsdam", "rwth".
+			Default="gfsm,potsdam,rwth"
 			]),
 	[ac_cv_fsm_try="$withval"],
 	[ac_cv_fsm_try="potsdam,gfsm,rwth"])

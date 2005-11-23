@@ -122,7 +122,7 @@ namespace mootm {
     tlabs = gfsm_alphabet_string_to_labels(abet_lo, tok.text().c_str(), tlabs, want_warnings);
 
     //-- lookup
-    result = gfsm_lookup(tlabs, mfst, result);
+    result = gfsm_automaton_lookup(mfst, tlabs, result);
 
     //-- serialize
     if (paths) gfsm_set_clear(paths);
