@@ -101,8 +101,9 @@ namespace mootm {
   /*------------------------------------------------------------------------*/
   mootToken& mootFSMPotsdam::analyze_token(mootToken &tok, bool want_avm, bool want_warnings)
   {
-    //-- analyze
-    result = mfst->fsm_lookup(tok.text(), NULL, false, true, false);
+    //-- analyze : fsm_lookup(string s, FSM *result, bool deterministic, bool connect, bool warn)
+    //result = mfst->fsm_lookup(tok.text(), NULL, false, false, false); //-- no connect => 1.1K tok/s
+    result = mfst->fsm_lookup(tok.text(), NULL, false, true, false); //-- +connect => 1.5K tok/s
 
     //-- serialize, NOT extracting tags
     analyses.clear();

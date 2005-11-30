@@ -124,8 +124,8 @@ void GetMyOptions(int argc, char **argv)
   //-- show banner
   if (args.verbose_arg >= vlProgress)
     fprintf(stderr,
-	    "%s version %s by Bryan Jurish <moocow@ling.uni-potsdam.de>, using %s\n\n",
-	    PROGNAME, VERSION, MOOTM_FSM_LIBRARY);
+	    "%s version %s by Bryan Jurish <moocow@ling.uni-potsdam.de>\n\n",
+	    PROGNAME, VERSION);
 
   //-- output file
   if (!out.open(args.output_arg,"w")) {
@@ -158,8 +158,10 @@ void GetMyOptions(int argc, char **argv)
 
   //-- morphology object setup
   if (args.verbose_arg >= vlProgress) {
-    fprintf(stderr, "%s: loading morphology (syms='%s', fst='%s')...",
-	    PROGNAME, args.symbols_arg, args.morph_arg);
+    fprintf(stderr, "%s: configuration\n", PROGNAME);
+    fprintf(stderr, "%s:    + Symbols    : %s\n", PROGNAME, args.symbols_arg);
+    fprintf(stderr, "%s:    + Transducer : %s\n", PROGNAME, args.morph_arg);
+    fprintf(stderr, "%s: loading morphology...", PROGNAME);
   }
   if (!morph.load(args.morph_arg, args.symbols_arg)) {
     fprintf(stderr,"\n%s: load FAILED for morpholgy (syms='%s', fst='%s')!\n",
