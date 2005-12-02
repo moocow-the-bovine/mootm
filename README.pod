@@ -13,11 +13,40 @@ mootm - moocow's part-of-speech tagger: morphology.
 =over 4
 
 
+=item moot E<gt>= v2.0.0
+
+Available from http://www.ling.uni-potsdam.de/~moocw/projects/moot
+
+
+=item Underlying finite-state device library
+
+mootm can use any one of several underlying libraries
+for finite-state device operations, including the following:
+
+=over 4
+
+=item GNU libgfsm E<gt>= v0.0.7
+
+Available from http://www.ling.uni-potsdam.de/~moocow/projects/gfsm
+
+=item University of Potsdam FSMlib E<gt> v0.9.0.1
+
+For details and availability, contact its author, Thomas Hanneforth.
+
+=item RWTH libFsa
+
+Available from http://www.informatik.rwth-aachen.de/I6/~kanthak/fsa.html
+
+RWTH libFsa support is implemented but currently broken.
+Feel free to fix it if you like.
+
+=back
+
+
 =item pkg-config
 
 Available from:
 http://www.freedesktop.org/software/pkgconfig/
-
 
 
 =item flex++ , bison++
@@ -31,59 +60,23 @@ from the official distribution site of this package.
 Tested with flex++-v2.3.8-4 and bison++-v1.21-5.
 
 
-=item STLport E<gt>= 4.5.3
+=item Perl (Optional)
 
-Available from http://www.stlport.org
+Get it from http://www.cpan.org or http://www.perl.com
+Required for building command-line parsers, utility
+documentation, library documentation, etc.
 
-Only required for building with gcc-2.x.
+=item Getopt::Gen
 
+A Perl module used to generate command-line option parsers.
+Available from:
+http://www.ling.uni-potsdam.de/~moocow/projects/perl/index.html#gog
 
-=begin comment text
+=item pod2man, pod2text, pod2html (Optional)
 
-=item libbumble E<gt>= 1.13.5
-
-Origninal sources available from
-http://www.bumblebeesoftware.com
-
-You will need a pkg-config metafile (libbumble.pc)
-for this requirement
-in your PKG_CONFIG_PATH in order to compile this
-package -- you can make one yourself, or you can
-get one from the official distribution site of
-this package.
-
-=end comment text
-
-
-=item libFSM E<gt>= v0.1.0.6
-
-Currently available only from its original author,
-Thomas Hanneforth E<lt>tom@ling.uni-potsdam.deE<gt>.
-
-You will need a pkg-config metafile (libFSM.pc)
-for this requirement
-in your PKG_CONFIG_PATH in order to compile this
-package -- you can make one yourself, or you can
-get one from the author of this package.
-
-=begin comment text
-
-the official distribution site of this package.
-
-=end comment text
-
-
-=item libFSMext E<gt>= v0.0.2
-
-Only needed for libFSM <= v0.1.1.1.
-Should be available wherever you got this package.
-
-You will need a pkg-config metafile (libFSMext.pc)
-for this requirement
-in your PKG_CONFIG_PATH in order to compile this
-package -- you can make one yourself, or you can
-get one from
-the official distribution site of this package.
+The Perl documentation converstion utilities, required
+for building the correspdonding program documentation
+formats, should have come with your Perl.
 
 =back
 
@@ -112,14 +105,10 @@ script:
 This will create the 'configure' script and other
 necessary build files.
 
-You will also need the Getopt::Gen perl module,
-which should be available from wherever you acquired
-these sources.
-
 
 =head1 KNOWN BUGS
 
-Looks like there is a memory leak somewhere...
+Probably many.
 
 =begin comment text
 
@@ -152,14 +141,12 @@ and others for offering useful insights in the course of development
 of this package.
 
 Thomas Hanneforth wrote and maintains the libFSM C++ library
-for finite-state device operations used by the
-class-based HMM tagger / disambiguator, without which this
-package could not have been built.
+for finite-state device operations used in the development
+of this package.
 
 Alexander Geyken and Thomas Hanneforth developed the
 rule-based morphological analysis system for German
-which was used in the development and testing of the
-class-based HMM tagger / disambiguator.
+which was used in the development and testing of this package.
 
 =head1 AUTHOR
 
