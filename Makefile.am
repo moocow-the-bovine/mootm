@@ -28,6 +28,9 @@ PODS = README.pod
 .pod.txt:
 	pod2text $< $@
 
+.pod.html:
+	pod2html --outfile $@ $<
+
 #-----------------------------------------------------------------------
 # Variables: docs (requires that 'pkgdocdir' gets set in configure.in
 #-----------------------------------------------------------------------
@@ -225,7 +228,8 @@ nodist:
 #MOSTLYCLEANFILES =
 
 ## --- clean: built by 'make'
-#CLEANFILES =
+CLEANFILES = \
+	*.tmp
 
 ## --- distclean: built by 'configure'
 DISTCLEANFILES = \
