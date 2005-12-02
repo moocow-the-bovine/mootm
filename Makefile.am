@@ -12,7 +12,8 @@
 #-----------------------------------------------------------------------
 
 ## --- automake options
-AUTOMAKE_OPTIONS = foreign dist-bzip2
+#AUTOMAKE_OPTIONS = foreign dist-bzip2
+AUTOMAKE_OPTIONS = foreign
 
 ## --- recursion subdirectories
 SUBDIRS = config src doc
