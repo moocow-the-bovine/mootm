@@ -1,5 +1,8 @@
 ChangeLog for package mootm
 
+2.0.5 Fri, 02 Dec 2005 17:34:16 +0100
+        + added abstract underlying FSM library support: new default is gfsm
+
 2.0.3 Sun, 08 Aug 2004 16:45:39 +0200
 	+ changed copyright policy for lib to LGPL-2.1
 	+ added COPYING.LIB
