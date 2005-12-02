@@ -63,6 +63,9 @@ doxy-filter.cfg:
 	  if test \( -n "$(DOC_LATEX_TARGETS)" -a -d ./latex \) ; then \
 	    $(MAKE) -i -C ./latex $(DOC_LATEX_TARGETS) ;\
 	  fi ;\
+	  if test \( -d "$(builddir)/html" \) ; then \
+	    $(INSTALL_DATA) @srcdir@/libmoot.css $(builddir)/html/libmoot.css ;\
+	  fi ;\
 	 else \
 	  echo "-------------------------------------------------------------------" ;\
 	  echo "doxygen not found or unspecified:" ;\
@@ -138,7 +141,9 @@ install-latex-sub:
 
 ## --- extra distribution files
 EXTRA_DIST = \
-	doxy-filter.perl
+	doxy-filter.perl \
+	libmoot.css \
+	libmoot-header.html
 
 ## --- recursion subdirectories for 'make dist'
 #DIST_SUBDIRS =

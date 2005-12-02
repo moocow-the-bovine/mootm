@@ -126,7 +126,8 @@ MAINTAINERCLEANFILES = \
 EXTRA_DIST = \
 	@DOC_PROG_TXT_TARGETS@ \
 	@DOC_PROG_MAN_TARGETS@ \
-	@DOC_PROG_HTML_TARGETS@
+	@DOC_PROG_HTML_TARGETS@ \
+	mootprogs.css
 
 ## --- recursion subdirectories for 'make dist'
 #DIST_SUBDIRS = $(SUBDIRS)
