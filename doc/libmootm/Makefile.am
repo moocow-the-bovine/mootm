@@ -56,15 +56,15 @@ $(STAMPFILE): $(DOXY_INPUTS) doxy-filter.cfg
 doxy-filter.cfg:
 	echo -e '$$config_cppflags .= "$(patsubst %,-I%,$(DOXY_INCLUDES))";\n1;' > doxy-filter.cfg
 
-.doxy.stamp: doxy-filter.cfg
+.doxy.stamp: doxy-filter.cfg @srcdir@/libmoot.css
 	@(if test -n "$(DOXYGEN)" ; then \
 	  echo "$(DOXYGEN) $<" ;\
 	  $(DOXYGEN) $< ;\
 	  if test \( -n "$(DOC_LATEX_TARGETS)" -a -d ./latex \) ; then \
 	    $(MAKE) -i -C ./latex $(DOC_LATEX_TARGETS) ;\
 	  fi ;\
-	  if test \( -d "$(builddir)/html" \) ; then \
-	    $(INSTALL_DATA) @srcdir@/libmoot.css $(builddir)/html/libmoot.css ;\
+	  if test \( -d "$(builddir)html" \) ; then \
+	    $(INSTALL_DATA) @srcdir@/libmoot.css $(builddir)html/libmoot.css ;\
 	  fi ;\
 	 else \
 	  echo "-------------------------------------------------------------------" ;\
@@ -73,9 +73,6 @@ doxy-filter.cfg:
 	  echo "-------------------------------------------------------------------" ;\
 	 fi)
 	 touch $@
-
-doxy-filter.cfg:
-	echo -e '$$config_cppflags = "$(patsubst %,-I%,$(DOXY_INCLUDES))";\n1;' > doxy-filter.cfg
 
 #-----------------------------------------------------------------------
 # Variables: cleanup

@@ -163,9 +163,9 @@ GENERATE_AUTOGEN_DEF   = NO
 #---------------------------------------------------------------------------
 # Configuration options related to the preprocessor   
 #---------------------------------------------------------------------------
-#ENABLE_PREPROCESSING   = YES
-#MACRO_EXPANSION        = YES
-ENABLE_PREPROCESSING   = NO
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+#ENABLE_PREPROCESSING   = NO
 MACRO_EXPANSION        = NO
 EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES

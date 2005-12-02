@@ -68,7 +68,7 @@ OPTGENFLAGS = -l
 POD2MANFLAGS = \
 	--center="moocow's Morphology Tools" \
 	--release="mootm v$(VERSION)"
-POD2HTMLFLAGS = --podpath="$(srcdir):." --htmlroot="."
+POD2HTMLFLAGS = --podpath="$(srcdir):." --htmlroot="." --css="mootprogs.css"
 
 .pod.1:
 	$(POD2MAN) $(POD2MANFLAGS) --section=1 $< $@
