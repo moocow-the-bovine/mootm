@@ -36,6 +36,7 @@ PODS = README.pod
 #-----------------------------------------------------------------------
 pkgdoc_DATA = \
 	$(PODS:.pod=.txt) \
+	$(PODS:.pod=.html) \
 	AUTHORS \
 	COPYING \
 	ChangeLog
