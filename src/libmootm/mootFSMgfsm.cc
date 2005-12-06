@@ -126,7 +126,7 @@ namespace mootm {
 
     //-- serialize
     if (paths) gfsm_set_clear(paths);
-    paths = gfsm_automaton_paths(result, paths);
+    paths = gfsm_automaton_paths_full(result, paths, gfsmLSUpper);
 
     //-- stringify directly to the mootToken
     analyze_params.abet = abet_hi;
@@ -147,7 +147,7 @@ namespace mootm {
   {
     g_string_truncate(params->gstr,0);
     gfsm_alphabet_labels_to_gstring(params->abet,
-				    path->lo,
+				    path->hi,
 				    params->gstr,
 				    params->warn_on_undefined,
 				    params->att_style);

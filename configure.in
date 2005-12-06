@@ -3,7 +3,7 @@ AC_PREREQ(2.5)
 
 dnl Some handy macros
 define([THE_PACKAGE_NAME],    [mootm])
-define([THE_PACKAGE_VERSION], [2.0.5])
+define([THE_PACKAGE_VERSION], [2.0.6-pre1])
 define([THE_PACKAGE_AUTHOR],  [moocow@ling.uni-potsdam.de])
 
 AC_INIT(THE_PACKAGE_NAME, THE_PACKAGE_VERSION, THE_PACKAGE_AUTHOR)
@@ -169,7 +169,7 @@ for fsm_lib in $fsm_which_libs ; do
       ;;
 
     gfsm)
-      PKG_CHECK_MODULES(GFSM, gfsm >= 0.0.7, [HAVE_GFSM="yes"], [HAVE_GFSM=""])
+      PKG_CHECK_MODULES(GFSM, gfsm >= 0.0.8, [HAVE_GFSM="yes"], [HAVE_GFSM=""])
       if test "$HAVE_GFSM" = "yes" ; then
         ac_cv_fsm_which="gfsm"
 	break
