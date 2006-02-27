@@ -1,5 +1,8 @@
 ChangeLog for package mootm
 
+2.0.6 2006-02-27 11:33:46
+        + added support for implicit EOW markers
+	
 2.0.5 Fri, 02 Dec 2005 17:34:16 +0100
         + added abstract underlying FSM library support: new default is gfsm
 

@@ -145,6 +145,7 @@ void GetMyOptions(int argc, char **argv)
   if (args.verbose_arg >= vlTiming) gettimeofday(&t1, NULL);
 
   //-- mophology object setup: flags
+  morph.eow_str                = args.eow_arg;
   morph.want_avm               = args.avm_given;
   morph.force_reanalysis       = args.reanalyze_given;
   morph.first_analysis_is_best = args.first_is_best_given;
@@ -162,6 +163,7 @@ void GetMyOptions(int argc, char **argv)
     fprintf(stderr, "%s: configuration\n", PROGNAME);
     fprintf(stderr, "%s:    + Symbols    : %s\n", PROGNAME, args.symbols_arg);
     fprintf(stderr, "%s:    + Transducer : %s\n", PROGNAME, args.morph_arg);
+    fprintf(stderr, "%s:    + EOW String : \"%s\"\n", PROGNAME, args.eow_arg);
     fprintf(stderr, "%s: loading morphology...", PROGNAME);
   }
   if (!morph.load(args.morph_arg, args.symbols_arg)) {

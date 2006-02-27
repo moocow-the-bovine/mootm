@@ -99,6 +99,9 @@ public:
 
   /** \name Flags */
   //@{
+  /** End-of-word string, "" for none */
+  std::string eow_str;
+
   /** Generate output strings in AVM (madwds-"vector") mode? (default = false) */
   bool want_avm;
 
@@ -150,6 +153,7 @@ public:
   //@{
   /** constructor */
   mootMorph(void) :
+    eow_str(""),
     want_avm(false),
     force_reanalysis(false),
     first_analysis_is_best(false),
@@ -209,7 +213,13 @@ public:
   inline mootToken& analyze_token(mootToken &tok)
   {
     //-- analyze
-    mfsm.analyze_token(tok, want_avm, (verbose >= vlWarnings));
+    if (eow_str == "") {
+      mfsm.analyze_token(tok, want_avm, (verbose >= vlWarnings));
+    } else {
+      tok.textAppend(eow_str);
+      mfsm.analyze_token(tok, want_avm, (verbose >= vlWarnings));
+      tok.tok_text.erase( tok.tok_text.end()-eow_str.size(), tok.tok_text.end() );
+    }
 
     //-- track statistics
     nanalyzed++;

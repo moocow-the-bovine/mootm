@@ -78,7 +78,9 @@ namespace mootm {
     { return false; };
 
     /** Analyze a single mootToken in-place */
-    virtual mootToken& analyze_token(mootToken &tok, bool want_avm=true, bool want_warnings=true)
+    virtual mootToken& analyze_token(mootToken   &tok,
+				     bool        want_avm=true,
+				     bool        want_warnings=true)
     { dummy("analyze_token"); return tok; }
 
   public:

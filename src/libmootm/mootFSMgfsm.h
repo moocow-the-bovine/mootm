@@ -130,7 +130,9 @@ namespace mootm {
     { return abet_lo && abet_hi && mfst; }
 
     /** Analyze a single mootToken in-place */
-    virtual mootToken& analyze_token(mootToken &tok, bool want_avm=true, bool want_warnings=true);
+    virtual mootToken& analyze_token(mootToken &tok,
+				     bool want_avm=true,
+				     bool want_warnings=true);
 
   }; // class mootFSMgfsm
 

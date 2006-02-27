@@ -116,7 +116,9 @@ namespace mootm {
     { return syms && mfst && *mfst; }
 
     /** Analyze a single mootToken in-place */
-    virtual mootToken& analyze_token(mootToken &tok, bool want_avm=true, bool want_warnings=true);
+    virtual mootToken& analyze_token(mootToken   &tok,
+				     bool        want_avm=true,
+				     bool        want_warnings=true);
 
     
   protected:

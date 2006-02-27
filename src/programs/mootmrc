@@ -1,2 +1,4 @@
-symbols		/home/moocow/work/dwds/tagging/taggers/ma-moot/moot.sym
-morph		/home/moocow/work/dwds/tagging/taggers/ma-moot/moot-stts-nofeatures.fst
+symbols		/home/moocow/work/dwds/tagging/taggers/ma-moot/mootm-stts.sym
+morph		/home/moocow/work/dwds/tagging/taggers/ma-moot/mootm-stts-nofeatures.gfst.gz
+avm		1
+eow		%

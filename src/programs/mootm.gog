@@ -154,6 +154,16 @@ used for morphological analysis.
 #It should nonetheless work correctly, due to heroic efforts on
 #the part of the author of this program.
 
+string "eow" e "Specify implicit EOW string." \
+  arg="STRING" \
+  default="" \
+  edefault="moot_EOW" \
+  details="
+If specified, STRING is an end-of-word marker which
+will be implicitly appended to the text of each input token
+before transducer lookup.
+"
+
 #-----------------------------------------------------------------------------
 # Addenda
 #-----------------------------------------------------------------------------
