@@ -2,7 +2,7 @@
 
 README for package 'mootm'
 
-Last updated for mootm version 2.0.1
+Last updated for mootm version 2.0.6
 
 =head1 DESCRIPTION
 
@@ -15,7 +15,11 @@ mootm - moocow's part-of-speech tagger: morphology.
 
 =item moot E<gt>= v2.0.0
 
-Available from http://www.ling.uni-potsdam.de/~moocw/projects/moot
+Available from http://www.ling.uni-potsdam.de/~moocow/projects/moot
+
+mootm uses libmoot for high-level I/O operations.  These should probably
+wander into their own library at some point, but they currently live in moot.
+moot version >= 2.0.6-pre1 is reccommended.
 
 
 =item Underlying finite-state device library
@@ -29,9 +33,13 @@ for finite-state device operations, including the following:
 
 Available from http://www.ling.uni-potsdam.de/~moocow/projects/gfsm
 
+libgfsm version >= 0.0.8-pre9 is reccommended.
+
+
 =item University of Potsdam FSMlib E<gt> v0.9.0.1
 
 For details and availability, contact its author, Thomas Hanneforth.
+
 
 =item RWTH libFsa
 
@@ -40,6 +48,7 @@ Available from http://www.informatik.rwth-aachen.de/I6/~kanthak/fsa.html
 RWTH libFsa support is implemented but currently broken.
 Feel free to fix it if you like.
 
+
 =back
 
 
@@ -47,17 +56,6 @@ Feel free to fix it if you like.
 
 Available from:
 http://www.freedesktop.org/software/pkgconfig/
-
-
-=item flex++ , bison++
-
-Alain Coetmeur's C++ ports of the famous lexer/parser
-generator pair, available from:
-ftp://iecc.com/pub/file/bison++flex++
-or
-from the official distribution site of this package.
-
-Tested with flex++-v2.3.8-4 and bison++-v1.21-5.
 
 
 =item Perl (Optional)
@@ -71,6 +69,7 @@ documentation, library documentation, etc.
 A Perl module used to generate command-line option parsers.
 Available from:
 http://www.ling.uni-potsdam.de/~moocow/projects/perl/index.html#gog
+
 
 =item pod2man, pod2text, pod2html (Optional)
 
@@ -92,6 +91,7 @@ Issue the following commands to the shell:
 
 See the file INSTALL in the top-level distribution
 directory for details.
+
 
 =head1 BUILD FROM CVS
 
