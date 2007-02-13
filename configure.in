@@ -237,10 +237,10 @@ case "$ac_cv_fsm_which" in
    ;;
 
  gfsm)
-   AC_MSG_RESULT([GNU libgfsm])
+   AC_MSG_RESULT([libgfsm])
    AC_DEFINE([USE_FSM_GFSM],1,
-	     [Define this to use the GNU libgfsm library])
-   AC_DEFINE([MOOTM_FSM_LIBRARY],["GNU libgfsm"],
+	     [Define this to use the LGPL libgfsm library])
+   AC_DEFINE([MOOTM_FSM_LIBRARY],["libgfsm"],
 	     [Human-readable name of the underlying finite-state library])
    ;;
 

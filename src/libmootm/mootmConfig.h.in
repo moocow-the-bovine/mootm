@@ -63,7 +63,7 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* Define this to use the GNU libgfsm library */
+/* Define this to use the LGPL libgfsm library */
 #undef USE_FSM_GFSM
 
 /* Define this to use the Potsdam libFSM library */
