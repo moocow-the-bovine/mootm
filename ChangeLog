@@ -1,7 +1,9 @@
 ChangeLog for package mootm
 
-2.0.6 2006-02-27 11:33:46
+2.0.6 Tue, 13 Feb 2007 13:31:07 +0100
         + added support for implicit EOW markers
+	+ updated autobuild system to enable cleaner builds for non-development environments
+	  - e.g. missing or broken optgen.perl, missing doxygen, missing pod2x, ...
 	
 2.0.5 Fri, 02 Dec 2005 17:34:16 +0100
         + added abstract underlying FSM library support: new default is gfsm
