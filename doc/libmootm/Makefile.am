@@ -10,7 +10,7 @@
 SUFFIXES = .doxy .stamp .tag .log
 
 ##-----------------------------------------------------------------------
-## Primaries: documentation
+## Primaries: documentation (real)
 ##-----------------------------------------------------------------------
 
 ## --- recursion subdirectories
@@ -56,8 +56,9 @@ $(STAMPFILE): $(DOXY_INPUTS) doxy-filter.cfg
 doxy-filter.cfg:
 	echo -e '$$config_cppflags .= "$(patsubst %,-I%,$(DOXY_INCLUDES))";\n1;' > doxy-filter.cfg
 
+if HAVE_DOXYGEN
 .doxy.stamp: doxy-filter.cfg @srcdir@/libmoot.css
-	@(if test -n "$(DOXYGEN)" ; then \
+	@(if test -n "$(DOXYGEN)" -a "$(DOXYGEN)" != "no" ; then \
 	  echo "$(DOXYGEN) $<" ;\
 	  $(DOXYGEN) $< ;\
 	  if test \( -n "$(DOC_LATEX_TARGETS)" -a -d ./latex \) ; then \
@@ -73,6 +74,14 @@ doxy-filter.cfg:
 	  echo "-------------------------------------------------------------------" ;\
 	 fi)
 	 touch $@
+else
+.doxy.stamp:
+	@echo "-------------------------------------------------------------------"
+	@echo "doxygen support disabled:"
+	@echo "will not build documentation from $(DOXYFILE)"
+	@echo "-------------------------------------------------------------------"
+	touch $@
+endif
 
 #-----------------------------------------------------------------------
 # Variables: cleanup
@@ -82,7 +91,8 @@ doxy-filter.cfg:
 #MOSTLYCLEANFILES =
 
 ## --- clean:  built by 'make'
-CLEANFILES = $(STAMPFILE) $(TAGFILE) $(DOXYBASE).log \
+CLEANFILES = \
+	$(STAMPFILE) $(TAGFILE) $(DOXYBASE).log \
 	doxy-filter.log \
 	doxy-filter.cfg
 
@@ -101,6 +111,8 @@ MAINTAINERCLEANFILES = \
 # install rules: multi-doxy hack
 #-----------------------------------------------------------------------
 .PHONY: install-data-local install-doc-sub install-latex-sub
+
+if HAVE_DOXYGEN
 
 install-data-local:
 	if test -n "$(DOC_SUBDIRS)" ; then \
@@ -130,7 +142,7 @@ install-latex-sub:
 	  for f in $(DOC_LATEX_TARGETS) ; do \
 	    $(INSTALL_DATA) latex/$$f $(DESTDIR)$(pkgdocdir)/$(DOXYBASE)/$$f ;\
 	  done
-
+endif
 
 #-----------------------------------------------------------------------
 # Variables: distribution

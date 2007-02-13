@@ -15,7 +15,7 @@
 ## primary targets
 ##-----------------------------------------------------------------------
 
-## --- manpages (section 1)
+## --- manpages (section 1: always)
 man1_MANS = @DOC_PROG_MAN_TARGETS@
 
 pkgdocprog_DATA = \
@@ -36,19 +36,29 @@ SUFFIXES = .gog .pod .txt .1 .html .tex .dvi .ps .pdf
 ##-----------------------------------------------------------------------
 all-local: $(man_MANS)
 
+if HAVE_POD2TEXT
 txt: $(mootm_program_gogs:.gog=.txt)
+endif
 
+if HAVE_POD2MAN
 man: $(mootm_program_gogs:.gog=.1)
+endif
 
+if HAVE_POD2HTML
 html: $(mootm_program_gogs:.gog=.html)
+endif
 
+if HAVE_POD2LATEX
 latex: $(mootm_program_gogs:.gog=.tex)
 
-dvi: $(mootm_program_gogs:.gog=.dvi)
+##-- distcheck always builds a 'dvi' target --
+#dvi: $(mootm_program_gogs:.gog=.dvi)
+dvi_doc: $(mootm_program_gogs:.gog=.dvi)
 
 ps: $(mootm_program_gogs:.gog=.ps)
 
 pdf: $(mootm_program_gogs:.gog=.pdf)
+endif
 
 
 ##-----------------------------------------------------------------------
@@ -58,8 +68,11 @@ pdf: $(mootm_program_gogs:.gog=.pdf)
 .SECONDARY:
 
 OPTGENFLAGS = -l
+
+if HAVE_OPTGEN
 .gog.pod:
-	optgen.perl $(OPTGENFLAGS) --nocfile --nohfile -F $* $<
+	$(OPTGEN_PERL) $(OPTGENFLAGS) --nocfile --nohfile -F $* $<
+endif
 
 ##-----------------------------------------------------------------------
 ## pod conversion rules
@@ -68,19 +81,29 @@ OPTGENFLAGS = -l
 POD2MANFLAGS = \
 	--center="moocow's Morphology Tools" \
 	--release="mootm v$(VERSION)"
+
 POD2HTMLFLAGS = --podpath="$(srcdir):." --htmlroot="." --css="mootprogs.css"
 
+
+if HAVE_POD2MAN
 .pod.1:
 	$(POD2MAN) $(POD2MANFLAGS) --section=1 $< $@
+endif
 
+if HAVE_POD2TEXT
 .pod.txt:
 	$(POD2TEXT) $< $@
+endif
 
+if HAVE_POD2HTML
 .pod.html:
 	$(POD2HTML) $(POD2HTMLFLAGS) --infile=$< --outfile=$@
+endif
 
+if HAVE_POD2LATEX
 .pod.tex:
 	$(POD2LATEX) --full --out $@ $<
+endif
 
 ##-----------------------------------------------------------------------
 ## latex compilation
@@ -106,12 +129,27 @@ POD2HTMLFLAGS = --podpath="$(srcdir):." --htmlroot="." --css="mootprogs.css"
 ## --- clean:  built by 'make'
 CLEANFILES = \
 	$(filter-out acknowledge.pod,$(wildcard *.pod)) \
-	*.man *.1 *.html *.txt *.tex *.dvi *.ps *.pdf \
+	*.dvi *.ps *.pdf \
 	*.log *.aux *.toc *.idx *.tmp *~~
 
+if HAVE_POD2MAN
+CLEANFILES += *.man *.1
+endif
+if HAVE_POD2HTML
+CLEANFILES += *.html
+endif
+if HAVE_POD2TEXT
+CLEANFILES += *.txt
+endif
+if HAVE_POD2LATEX
+CLEANFILES += *.tex
+endif
+
 ## --- distclean: built by 'configure'
-DISTCLEANFILES = \
-	*.pod *.gog
+DISTCLEANFILES = *.gog
+if HAVE_OPTGEN
+DISTCLEANFILES += *.pod
+endif
 
 ## -- maintainerclean: built by maintainer / by hand
 MAINTAINERCLEANFILES = \
@@ -124,9 +162,8 @@ MAINTAINERCLEANFILES = \
 
 ## --- extra distribution files
 EXTRA_DIST = \
-	@DOC_PROG_TXT_TARGETS@ \
-	@DOC_PROG_MAN_TARGETS@ \
-	@DOC_PROG_HTML_TARGETS@ \
+	@DOC_PROG_TXT_TARGETS@  \
+	@DOC_PROG_MAN_TARGETS@  \
 	mootprogs.css
 
 ## --- recursion subdirectories for 'make dist'

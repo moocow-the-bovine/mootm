@@ -80,16 +80,20 @@ noinst_HEADERS = config.h
 
 OPTGENFLAGS = -u -l
 
+if HAVE_OPTGEN
+
 .gog_cmdparser.h:
-	optgen.perl $(OPTGENFLAGS) --nopod -F $*_cmdparser $<
+	$(OPTGEN_PERL) $(OPTGENFLAGS) --nopod -F $*_cmdparser $<
 	mv $*_cmdparser.c $*_cmdparser.cc
 
 .gog_cmdparser.cc:
-	optgen.perl $(OPTGENFLAGS) --nopod -F $*_cmdparser $<
+	$(OPTGEN_PERL) $(OPTGENFLAGS) --nopod -F $*_cmdparser $<
 	mv $*_cmdparser.c $*_cmdparser.cc
 
 .gog.pod:
-	optgen.perl $(OPTGENFLAGS) --nocfile --nohfile -F $* $<
+	$(OPTGEN_PERL) $(OPTGENFLAGS) --nocfile --nohfile -F $* $<
+
+endif
 
 ##-----------------------------------------------------------------------
 ## pod conversion
@@ -97,17 +101,25 @@ OPTGENFLAGS = -u -l
 
 POD2MANFLAGS = --center="moocow's morphology tools"
 
+if HAVE_POD2MAN
 .pod.1:
 	pod2man $(POD2MANFLAGS) --section=1 $< $@
+endif
 
+if HAVE_POD2TEXT
 .pod.txt:
 	pod2text $< $@
+endif
 
+if HAVE_POD2HTML
 .pod.html:
 	pod2html --infile=$< --outfile=$@
+endif
 
+if HAVE_POD2LATEX
 .pod.tex:
 	pod2latex --full --out $@ $<
+endif
 
 ##-----------------------------------------------------------------------
 ## compile flags

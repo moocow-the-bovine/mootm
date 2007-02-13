@@ -147,7 +147,7 @@ AC_ARG_WITH([fsm],
 			Default="gfsm,potsdam,rwth"
 			]),
 	[ac_cv_fsm_try="$withval"],
-	[ac_cv_fsm_try="potsdam,gfsm,rwth"])
+	[ac_cv_fsm_try="gfsm,potsdam,rwth"])
 
 AC_ARG_WITH([rwth-fsa-dir],
 	AC_HELP_STRING([--with-rwth-fsa-dir=DIR],
@@ -425,27 +425,69 @@ fi ## test -n "$PC_HAVE_MOOT"
 dnl moot
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+dnl ------------------------------------------------------------
+dnl DISTCHECK: simulate missing development-only packages
+AC_ARG_VAR(DISTCHECK,
+	[(Maintainer): set to nonempty value to simulate missing development packages])
+if test -n "$DISTCHECK" ; then
+   test -z "$OPTGEN_PERL" && OPTGEN_PERL=no
+   test -z "$DOXYGEN" && DOXYGEN=no
+   test -z "$POD2X" && POD2TEXT=no
+   test -z "$POD2X" && POD2MAN=no
+   test -z "$POD2X" && POD2HTML=no
+   test -z "$POD2X" && POD2LATEX=no
+fi
+dnl /DISTCHECK
+dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+dnl ------------------------------------------------------------
+dnl check for perl
+AC_ARG_VAR(PERL, [Path to your perl interpreter.])
+if test -z "$PERL" ; then
+  AC_PATH_PROG(PERL,[perl],[])
+fi
+AC_SUBST(PERL)
+dnl perl
+dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 dnl ------------------------------------------------------------
 dnl check for optgen.perl
 dnl
-AC_ARG_VAR(OPTGEN_PERL, [Path to the 'optgen.perl' script.])
-AC_ARG_WITH([optgen-perl],
-	AC_HELP_STRING([--with-optgen-perl=PATH],
-		       [Specify location of optgen.perl]),
-	[OPTGEN_PERL="$withval"])
+AC_ARG_VAR(OPTGEN_PERL, [Path to the 'optgen.perl' script (disable with OPTGEN_PERL=no)])
+
+##-- test for working optgen.perl
+AC_MSG_CHECKING([whether Getopt::Gen works])
+  #if $OPTGEN_PERL --version >>config.log 2>&1 ; then
+  if $PERL -MGetopt::Gen -e'exit 0;' >>config.log 2>&1; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+  AC_MSG_WARN([])
+  AC_MSG_WARN([Getopt::Gen (or something it depends on) is broken!])
+  AC_MSG_WARN([- you probably need to fix your Parse::Lex module])
+  AC_MSG_WARN([- hope you're not building from CVS])
+  AC_MSG_WARN([])
+  OPTGEN_PERL="no"
+fi
 
 if test -z "$OPTGEN_PERL" ; then
-  AC_PATH_PROG(OPTGEN_PERL,[optgen.perl],[])
-  if test -z "$OPTGEN_PERL" ; then
-    AC_MSG_RESULT([not found])
+  AC_PATH_PROG(OPTGEN_PERL,[optgen.perl],[no])
+  if test "$OPTGEN_PERL" = "no" ; then
     AC_MSG_WARN([])
-    AC_MSG_WARN([cannot find optgen.perl program -- CVS builds will fail!])
+    AC_MSG_WARN([missing or broken optgen.perl program])
+    AC_MSG_WARN([- builds from CVS will probably fail])
     AC_MSG_WARN([])
   fi
 fi
-AC_SUBST(OPTGEN_PERL)
 
+AC_SUBST(OPTGEN_PERL)
+AC_MSG_NOTICE([setting OPTGEN_PERL=$OPTGEN_PERL])
+AM_CONDITIONAL(HAVE_OPTGEN, [test "$OPTGEN_PERL" != "no"])
+dnl
+dnl /optgen.perl
+dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 dnl ------------------------------------------------------------
@@ -456,6 +498,10 @@ AC_ARG_WITH(docdir,
 		[install documentation in DIR/AC_PACKAGE_NAME (default=DATADIR/doc)]),
 	[docdir="$withval"],
 	[docdir="\${datadir}/doc"])
+AC_ARG_ENABLE(doc,
+	AC_HELP_STRING([--enable-doc],[Synonym for --with-doc-formats=none]),
+	[enable_doc="$enableval"],[enable_doc="yes"])
+
 pkgdocdir="\${docdir}/\${PACKAGE}"
 pkgdocprogdir="\${docdir}/\${PACKAGE}/programs"
 
@@ -466,53 +512,71 @@ AC_SUBST(pkgdocprogdir)
 AC_ARG_WITH(doc-formats,
 	AC_HELP_STRING([--with-doc-formats=LIST],
 		       [Build documentation formats in LIST. \
-                        Available formats: txt, man, html, dvi, ps, pdf, none.
-	                Default='man html']),
+                        Available formats: txt, man, html, dvi, ps, pdf, none. \
+	                Default='txt man html']),
 	[ac_cv_doc_formats="$withval"])
+AC_MSG_CHECKING([which documentation formats to build])
 
 ## -- set default doc formats if unspecified
 if test -z "$ac_cv_doc_formats" ; then
-  ac_cv_doc_formats="man html"
+  ac_cv_doc_formats="txt man html"
 fi
 
 ## -- un-comma-tize the doc-formats
 mootm_doc_formats=`echo "$ac_cv_doc_formats" | sed 's/\,/ /g'`
 
 
-AC_ARG_ENABLE(doc,
-	AC_HELP_STRING([--enable-doc],[Synonym for --with-doc-formats=none]),
-	[enable_doc="$enableval"],[enable_doc="yes"])
-
-
-AC_MSG_CHECKING([which documentation formats to build])
 if test "$enable_doc" != "yes" ; then
  ### disable all docs
  mootm_doc_formats="none"
 fi
-AC_MSG_RESULT($mootm_doc_formats)
+AC_MSG_RESULT([$mootm_doc_formats])
 #echo ">> post RESULT"
 
+AC_ARG_VAR(DOXYGEN,[Path to doxygen documentation generator (disable by setting DOXYGEN=no)])
 
 if test "$mootm_doc_formats" != "none" ; then
   ### docs: prog doxygen
-  AC_PATH_PROG(DOXYGEN,doxygen,[])
-  AC_SUBST(DOXYGEN)
-  AC_SUBST(DOXYGEN_SOURCES)
-
-  ### -- report doxygen-check results
   if test -z "$DOXYGEN" ; then
-    AC_MSG_WARN([doxygen not found: library documentation will not be built!]) 
+    AC_PATH_PROG(DOXYGEN,doxygen,[no])
   fi
 
+  ###-- report doxygen-check results
+  if test -z "$DOXYGEN" -o "$DOXYGEN" = "no"; then
+    DOXYGEN="no"
+    AC_MSG_WARN([doxygen not found: library documentation will not be built!]) 
+  fi
+  AC_MSG_NOTICE([setting DOXYGEN=$DOXYGEN])
+  AM_CONDITIONAL(HAVE_DOXYGEN, [test "$DOXYGEN" != "no"])
+
+  ##-- doxygen: sources
+  AC_SUBST(DOXYGEN_SOURCES)
+
   ### docs: pod converters
-  AC_PATH_PROG(POD2TEXT,pod2text,[])
-  AC_PATH_PROG(POD2MAN,pod2man,[])
-  AC_PATH_PROG(POD2HTML,pod2html,[])
-  AC_PATH_PROG(POD2LATEX,pod2latex,[])
+  AC_ARG_VAR(POD2TEXT, [Path to perl 'pod2text' script; "no" for none])
+  AC_ARG_VAR(POD2MAN,  [Path to perl 'pod2man' script; "no" for none])
+  AC_ARG_VAR(POD2HTML, [Path to perl 'pod2html' script; "no" for none])
+  AC_ARG_VAR(POD2LATEX,[Path to perl 'pod2latex' script; "no" for none])
+  if test -z "$POD2TEXT" ; then
+     AC_PATH_PROG(POD2TEXT,pod2text,[no])
+  fi
+  if test -z "$POD2MAN"  ; then
+     AC_PATH_PROG(POD2MAN,pod2man,[no])
+  fi
+  if test -z "$POD2HTML" ; then
+     AC_PATH_PROG(POD2HTML,pod2html,[no])
+  fi
+  if test -z "$POD2LATEX"; then
+     AC_PATH_PROG(POD2LATEX,pod2latex,[no])
+  fi
   AC_SUBST(POD2TEXT)
   AC_SUBST(POD2MAN)
   AC_SUBST(POD2HTML)
   AC_SUBST(POD2LATEX)
+  AM_CONDITIONAL(HAVE_POD2TEXT,  [test "$POD2TEXT"  != "no"])
+  AM_CONDITIONAL(HAVE_POD2MAN,   [test "$POD2MAN"   != "no"]) 
+  AM_CONDITIONAL(HAVE_POD2HTML,  [test "$POD2HTML"  != "no"])
+  AM_CONDITIONAL(HAVE_POD2LATEX, [test "$POD2LATEX" != "no"])
 
   ### -- docs: .gog file linkup
   #mootm_program_gogs="moot.gog mootpp.gog moot-fstgen.gog moot-pargen.gog"
@@ -535,32 +599,34 @@ if test "$mootm_doc_formats" != "none" ; then
     case "$fmt" in
 
       txt)
-	if test -n "$POD2TEXT" ; then
+	##-- program text docs are pre-built & distributed!
+dnl	if test "$POD2TEXT" != "no" ; then
 	  DOC_PROG_TXT_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.txt/g'`
-	else
-	  AC_MSG_WARN(pod2text not found -- program text docs will not be built!)
-	fi
+dnl	else
+dnl	  AC_MSG_WARN(pod2text not found -- program text docs will not be built!)
+dnl	fi
 	;;
 
       man)
-	if test -n "$DOXYGEN" ; then
+	if test "$DOXYGEN" != "no" ; then
 	  DOXY_WANT_MAN="YES"
           DOC_MANDIRS="man/man3"
           DOC_MAN3_MANS="man/man3/*"
 	fi
-	if test -n "$POD2MAN" ; then
+	##-- program manpages are pre-built & distributed!
+dnl	if test "$POD2MAN" != "no" ; then
 	  DOC_PROG_MAN_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.1/g'`
-	else
-	  AC_MSG_WARN(pod2man not found -- program manpages will not be built!)
-	fi
+dnl	else
+dnl	  AC_MSG_WARN(pod2man not found -- program manpages will not be built!)
+dnl	fi
 	;;
 
       html)
-	if test -n "$DOXYGEN" ; then
+	if test "$DOXYGEN" != "no" ; then
           DOXY_WANT_HTML="YES"
           DOC_SUBDIRS="$DOC_SUBDIRS html"
 	fi
-	if test -n "$POD2HTML" ; then
+	if test "$POD2HTML" != "no"; then
 	  DOC_PROG_HTML_TARGETS="mootprogs.css `echo "$mootm_program_gogs" | sed 's/\.gog/\.html/g'`"
 	else
 	  AC_MSG_WARN(pod2html not found -- program html docs will not be built!)
@@ -568,11 +634,11 @@ if test "$mootm_doc_formats" != "none" ; then
 	;;
 
       dvi)
-	if test -n "$DOXYGEN" ; then
+	if test "$DOXYGEN" != "no"; then
 	  DOXY_WANT_LATEX="YES"
 	  DOC_LATEX_TARGETS="${DOC_LATEX_TARGETS} refman.dvi"
 	fi
-	if test -n "$POD2LATEX" ; then
+	if test "$POD2LATEX" != "no"; then
 	  DOC_PROG_DVI_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.dvi/g'`
 	else
 	  AC_MSG_WARN(pod2latex not found -- program dvi docs will not be built!)
@@ -580,11 +646,11 @@ if test "$mootm_doc_formats" != "none" ; then
 	;;
 
       ps)
-	if test -n "$DOXYGEN" ; then
+	if test "$DOXYGEN" != "no" ; then
 	  DOXY_WANT_LATEX="YES"
 	  DOC_LATEX_TARGETS="${DOC_LATEX_TARGETS} refman.ps"
 	fi
-	if test -n "$POD2LATEX" ; then
+	if test "$POD2LATEX" != "no" ; then
 	  DOC_PROG_PS_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.ps/g'`
 	else
 	  AC_MSG_WARN(pod2latex not found -- program postscript docs will not be built!)
@@ -592,11 +658,11 @@ if test "$mootm_doc_formats" != "none" ; then
 	;;
 
       pdf)
-	if test -n "$DOXYGEN" ; then
+	if test "$DOXYGEN" != "no" ; then
 	  DOXY_WANT_LATEX="YES"
     	  DOC_LATEX_TARGETS="${DOC_LATEX_TARGETS} refman.pdf"
 	fi
-	if test -n "$POD2LATEX" ; then
+	if test "$POD2LATEX" != "no" ; then
 	  DOC_PROG_PDF_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.pdf/g'`
 	else
 	  AC_MSG_WARN(pod2latex not found -- program pdf docs will not be built!)

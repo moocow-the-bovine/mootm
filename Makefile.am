@@ -26,11 +26,15 @@ SUFFIXES = .pod .txt .deb .rpm .spec .ifiles
 #-----------------------------------------------------------------------
 PODS = README.pod
 
+if HAVE_POD2TEXT
 .pod.txt:
 	pod2text $< $@
+endif
 
+if HAVE_POD2HTML
 .pod.html:
 	pod2html --outfile $@ $<
+endif
 
 #-----------------------------------------------------------------------
 # Variables: docs (requires that 'pkgdocdir' gets set in configure.in
@@ -41,6 +45,7 @@ pkgdoc_DATA = \
 	AUTHORS \
 	COPYING \
 	ChangeLog
+
 
 #-----------------------------------------------------------------------
 # Variables: installation (pkg-config)
@@ -242,6 +247,7 @@ DISTCLEANFILES = \
 ## -- maintainerclean: built by maintainer / by hand
 MAINTAINERCLEANFILES = *~ \
 	$(PODS:.pod=.txt) \
+	$(PODS:.pod=.html) \
 	Makefile Makefile.in \
 	aclocal.m4 \
 	configure
@@ -259,6 +265,7 @@ MAINTAINERCLEANFILES = *~ \
 EXTRA_DIST = \
 	INSTALL \
 	$(PODS:.pod=.txt) \
+	$(PODS:.pod=.html) \
 	$(DEBIAN_FILES) \
 	autogen.sh\
 	configure
