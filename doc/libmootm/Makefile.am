@@ -10,6 +10,46 @@
 SUFFIXES = .doxy .stamp .tag .log
 
 ##-----------------------------------------------------------------------
+## Conditional targets
+##-----------------------------------------------------------------------
+
+DOXY_MAN3_MANS=
+DOXY_HTML_STATIC=
+DOXY_INSTALL_SUBDIRS=
+DOXY_LATEX_TARGETS=
+
+
+if HAVE_DOXYGEN
+
+if DOC_WANT_MAN
+DOXY_MAN3_MANS +=man/man3/*
+endif
+
+if DOC_WANT_HTML
+DOXY_HTML_STATIC     +=libmoot.css
+DOXY_INSTALL_SUBDIRS +=html
+endif
+
+##-- LaTeX
+if DOC_WANT_LATEX
+if DOC_WANT_DVI
+DOXY_LATEX_TARGETS +=refman.dvi
+endif
+if DOC_WANT_PS
+DOXY_LATEX_TARGETS +=refman.ps
+endif
+
+if DOC_WANT_PDF
+DOXY_LATEX_TARGETS +=refman.pdf
+endif
+endif
+##--/DOC_WANT_LATEX
+
+endif
+##--/HAVE_DOXYGEN
+
+
+##-----------------------------------------------------------------------
 ## Primaries: documentation (real)
 ##-----------------------------------------------------------------------
 
@@ -17,7 +57,7 @@ SUFFIXES = .doxy .stamp .tag .log
 #SUBDIRS =
 
 ## -- section 3 manpages
-man3_MANS = @DOC_MAN3_MANS@
+man3_MANS = $(DOXY_MAN3_MANS)
 
 ## --- doxygen hack: doxy config files
 DOXYBASE = libmootm
@@ -25,7 +65,7 @@ DOXYFILE = $(DOXYBASE).doxy
 
 ## --- doxygen hack: doxy stamp files: dependencies
 STAMPFILE = $(DOXYFILE:.doxy=.stamp)
-TAGFILE = $(DOXYFILE:.doxy=.tag)
+TAGFILE   = $(DOXYFILE:.doxy=.tag)
 
 all-local: $(STAMPFILE)
 
@@ -45,10 +85,19 @@ DOXY_INPUTS = \
 # Additional dependencies
 #-----------------------------------------------------------------------
 
+
 ## --- doxygen hacks: dependencies
+DOXY_FILTER_DEPS=
+
+if HAVE_DOXY_FILTER
+DOXY_FILTER_DEPS += doxy-filter.cfg
+endif
+
+if HAVE_DOXYGEN
 $(man3_MANS): $(STAMPFILE)
 
-$(STAMPFILE): $(DOXY_INPUTS) doxy-filter.cfg
+$(STAMPFILE): $(DOXY_INPUTS) $(DOXY_FILTER_DEPS)
+endif
 
 #-----------------------------------------------------------------------
 # doxygen hack: build rules (recurse in this directory)
@@ -58,27 +107,25 @@ doxy-filter.cfg:
 
 if HAVE_DOXYGEN
 .doxy.stamp: doxy-filter.cfg @srcdir@/libmoot.css
-	@(if test -n "$(DOXYGEN)" -a "$(DOXYGEN)" != "no" ; then \
-	  echo "$(DOXYGEN) $<" ;\
-	  $(DOXYGEN) $< ;\
-	  if test \( -n "$(DOC_LATEX_TARGETS)" -a -d ./latex \) ; then \
-	    $(MAKE) -i -C ./latex $(DOC_LATEX_TARGETS) ;\
-	  fi ;\
-	  if test \( -d "$(builddir)html" \) ; then \
-	    $(INSTALL_DATA) @srcdir@/libmoot.css $(builddir)html/libmoot.css ;\
-	  fi ;\
-	 else \
-	  echo "-------------------------------------------------------------------" ;\
-	  echo "doxygen not found or unspecified:" ;\
-	  echo "cannot build documentation from $(DOXYFILE)" ;\
-	  echo "-------------------------------------------------------------------" ;\
-	 fi)
+	$(DOXYGEN) $<
+if DOC_WANT_LATEX
+	if test \( -n "$(DOXY_LATEX_TARGETS)" -a -d ./latex \) ; then \
+	  for t in $(DOXY_LATEX_TARGETS); do \
+	    $(MAKE) -i -C ./latex $$t ;\
+	  done;\
+	fi
+endif
+if DOC_WANT_HTML
+	if test \( -d "$(builddir)html" \) ; then \
+	  $(INSTALL_DATA) @srcdir@/libmoot.css $(builddir)html/libmoot.css ;\
+	fi
+endif
 	 touch $@
 else
 .doxy.stamp:
 	@echo "-------------------------------------------------------------------"
 	@echo "doxygen support disabled:"
-	@echo "will not build documentation from $(DOXYFILE)"
+	@echo "not building library documentation from $(DOXYFILE)"
 	@echo "-------------------------------------------------------------------"
 	touch $@
 endif
@@ -112,22 +159,22 @@ MAINTAINERCLEANFILES = \
 #-----------------------------------------------------------------------
 .PHONY: install-data-local install-doc-sub install-latex-sub
 
+##-- always install the .doxy file
+pkgdoclib_DATA = $(DOXYBASE).doxy
+
+
 if HAVE_DOXYGEN
 
+pkgdoclib_DATA += $(DOXYBASE).tag
+
 install-data-local:
-	if test -n "$(DOC_SUBDIRS)" ; then \
+	if test -n "$(DOXY_INSTALL_SUBDIRS)"; then \
 	  $(MAKE) $(AM_MAKEFLAGS) install-doc-sub ;\
-	fi
-	if test -n "$(DOC_LATEX_TARGETS)" ; then \
-	  $(MAKE) $(AM_MAKEFLAGS) install-latex-sub ;\
 	fi
 
 install-doc-sub:
 	  $(mkinstalldirs) $(DESTDIR)$(pkgdocdir)/$(DOXYBASE)
-	  if test -e $(DOXYBASE).tag ; then \
-	    $(INSTALL_DATA) $(TAGFILE) $(DESTDIR)$(pkgdocdir)/$(DOXYBASE)/$(DOXYBASE).tag ;\
-	  fi
-	  for d in $(DOC_SUBDIRS) ; do \
+	  for d in $(DOXY_INSTALL_SUBDIRS) ; do \
 	    if test -d "$$d" ; then \
 	      $(mkinstalldirs) $(DESTDIR)$(pkgdocdir)/$(DOXYBASE)/$$d ;\
 	      (cd $$d ;\
@@ -137,12 +184,21 @@ install-doc-sub:
 	    fi ;\
 	  done
 
-install-latex-sub:
-	  $(mkinstalldirs) $(DESTDIR)$(pkgdocdir)/$(DOXYBASE)
-	  for f in $(DOC_LATEX_TARGETS) ; do \
-	    $(INSTALL_DATA) latex/$$f $(DESTDIR)$(pkgdocdir)/$(DOXYBASE)/$$f ;\
-	  done
+if DOC_WANT_LATEX
+if DOC_WANT_DVI
+pkgdoclib_DATA += latex/refman.dvi
 endif
+if DOC_WANT_PS
+pkgdoclib_DATA += latex/refman.ps
+endif
+if DOC_WANT_PDF
+pkgdoclib_DATA += latex/refman.pdf
+endif
+endif
+##--/DOC_WANT_LATEX
+
+endif
+##--/HAVE_DOXYGEN
 
 #-----------------------------------------------------------------------
 # Variables: distribution
@@ -152,7 +208,8 @@ endif
 EXTRA_DIST = \
 	doxy-filter.perl \
 	libmoot.css \
-	libmoot-header.html
+	libmoot-header.html \
+	$(DOXYBASE).doxy
 
 ## --- recursion subdirectories for 'make dist'
 #DIST_SUBDIRS =

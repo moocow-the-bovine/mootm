@@ -12,18 +12,122 @@
 #SUBDIRS =
 
 ##-----------------------------------------------------------------------
-## primary targets
+## Potential targets
 ##-----------------------------------------------------------------------
 
-## --- manpages (section 1: always)
-man1_MANS = @DOC_PROG_MAN_TARGETS@
+##-- pods
+DOC_MAN1_PODS = $(DOC_MAN1_GOGS:.gog=.pod)
+DOC_MAN5_PODS = $(DOC_MAN5_GOGS:.gog=.pod)
+DOC_PODS      = $(DOC_GOGS:.gog=.pod)
 
-pkgdocprog_DATA = \
-	@DOC_PROG_TXT_TARGETS@ \
-	@DOC_PROG_HTML_TARGETS@ \
-	@DOC_PROG_DVI_TARGETS@ \
-	@DOC_PROG_PS_TARGETS@ \
-	@DOC_PROG_PDF_TARGETS@
+##--- manpages (section 1: always)
+DOC_MAN1_TARGETS = $(DOC_MAN1_PODS:.pod=.1)
+DOC_MAN5_TARGETS = $(DOC_MAN5_PODS:.pod=.5)
+DOC_MAN_TARGETS  = $(DOC_MAN1_TARGETS) $(DOC_MAN5_TARGETS)
+
+##-- text
+DOC_TXT_TARGETS = $(DOC_PODS:.pod=.txt)
+
+##-- html
+DOC_HTML_TARGETS = $(DOC_PODS:.pod=.html)
+DOC_HTML_STATIC  = mootprogs.css
+
+##-- latex
+DOC_LATEX_TARGETS = $(DOC_PODS:.pod=.tex)
+DOC_DVI_TARGETS   = $(DOC_PODS:.pod=.dvi)
+DOC_PS_TARGETS    = $(DOC_PODS:.pod=.ps)
+DOC_PDF_TARGETS   = $(DOC_PODS:.pod=.pdf)
+
+
+##-----------------------------------------------------------------------
+## Conditional targets: chosen by 'configure' & co.
+##-----------------------------------------------------------------------
+
+##-- automake 'EXTRA_*' vars
+EXTRA_man1_MANS       = $(DOC_MAN1_TARGETS)
+EXTRA_man5_MANS       = $(DOC_MAN5_TARGETS)
+
+##-- automake doesn't appear to understand EXTRA_${whatever}_DATA
+EXTRA_pkgdocprog_DATAFILES =
+	$(DOC_TXT_TARGETS) \
+	$(DOC_HTML_TARGETS) $(DOC_HTML_STATIC) \
+	$(DOC_DVI_TARGETS) \
+	$(DOC_PS_TARGETS) \
+	$(DOC_PDF_TARGETS)
+
+##-- accumulation variables
+BUILD_PODS=
+BUILD_MAN1_MANS=
+BUILD_MAN5_MANS=
+BUILD_DOCS=
+
+STATIC_PODS=
+STATIC_MAN1_MANS=
+STATIC_MAN5_MANS=
+STATIC_DOCS=
+
+##--- selected: pods
+if HAVE_OPTGEN
+BUILD_PODS += $(DOC_PODS)
+else
+STATIC_PODS += $(DOC_PODS)
+endif
+
+##--- selected: manpages (section 1: always)
+if DOC_WANT_MAN
+if HAVE_POD2MAN
+BUILD_MAN1_MANS += $(DOC_MAN1_TARGETS)
+BUILD_MAN5_MANS += $(DOC_MAN5_TARGETS)
+else
+STATIC_MAN1_MANS += $(DOC_MAN1_TARGETS)
+STATIC_MAN5_MANS += $(DOC_MAN5_TARGETS)
+endif
+endif
+
+##-- selected: text
+if DOC_WANT_TXT
+if HAVE_POD2TEXT
+BUILD_DOCS += $(DOC_TXT_TARGETS)
+endif
+endif
+
+##-- selected: html
+if DOC_WANT_HTML
+if HAVE_POD2HTML
+BUILD_DOCS  += $(DOC_HTML_TARGETS)
+STATIC_DOCS += $(DOC_HTML_STATIC)
+else
+STATIC_DOCS += $(DOC_HTML_TARGETS) $(DOC_HTML_STATIC)
+endif
+endif
+
+##-- selected: latex->(dvi|ps|pdf)
+if HAVE_POD2LATEX
+
+if DOC_WANT_DVI
+BUILD_DOCS += $(DOC_DVI_TARGETS)
+endif
+
+if DOC_WANT_PS
+BUILD_DOCS += $(DOC_PS_TARGETS)
+endif
+
+if DOC_WANT_PDF
+BUILD_DOCS += $(DOC_PDF_TARGETS)
+endif
+
+endif
+
+
+##-----------------------------------------------------------------------
+## Primary targets
+##-----------------------------------------------------------------------
+
+##-- primaries
+man1_MANS = $(BUILD_MAN1_MANS) $(STATIC_MAN1_MANS)
+man5_MANS = $(BUILD_MAN5_MANS) $(STATIC_MAN5_MANS)
+pkgdocprog_DATA = $(BUILD_DOCS) $(STATIC_DOCS)
+
 
 ##-----------------------------------------------------------------------
 ## sources
@@ -36,29 +140,20 @@ SUFFIXES = .gog .pod .txt .1 .html .tex .dvi .ps .pdf
 ##-----------------------------------------------------------------------
 all-local: $(man_MANS)
 
-if HAVE_POD2TEXT
-txt: $(mootm_program_gogs:.gog=.txt)
-endif
+txt: $(DOC_TXT_TARGETS)
 
-if HAVE_POD2MAN
-man: $(mootm_program_gogs:.gog=.1)
-endif
+man: $(DOC_MAN_TARGETS)
 
-if HAVE_POD2HTML
-html: $(mootm_program_gogs:.gog=.html)
-endif
+html: $(DOC_HTML_TARGETS)
 
-if HAVE_POD2LATEX
-latex: $(mootm_program_gogs:.gog=.tex)
+latex: $(DOC_LATEX_TARGETS)
 
 ##-- distcheck always builds a 'dvi' target --
-#dvi: $(mootm_program_gogs:.gog=.dvi)
-dvi_doc: $(mootm_program_gogs:.gog=.dvi)
+dvi-doc: $(DOC_DVI_TARGETS)
 
-ps: $(mootm_program_gogs:.gog=.ps)
+ps: $(DOC_PS_TARGETS)
 
-pdf: $(mootm_program_gogs:.gog=.pdf)
-endif
+pdf: $(DOC_PDF_TARGETS)
 
 
 ##-----------------------------------------------------------------------
@@ -88,6 +183,8 @@ POD2HTMLFLAGS = --podpath="$(srcdir):." --htmlroot="." --css="mootprogs.css"
 if HAVE_POD2MAN
 .pod.1:
 	$(POD2MAN) $(POD2MANFLAGS) --section=1 $< $@
+.pod.5:
+	$(POD2MAN) $(POD2MANFLAGS) --section=5 $< $@
 endif
 
 if HAVE_POD2TEXT
@@ -109,15 +206,14 @@ endif
 ## latex compilation
 ##-----------------------------------------------------------------------
 .tex.dvi:
-	latex $*
-	latex $*
+	latex -interaction=nonstopmode $*
+	latex -interaction=nonstopmode $*
 
 .dvi.ps:
 	dvips $*
 
-.tex.pdf:
-	pdflatex $*
-	pdflatex $*
+.ps.pdf:
+	ps2pdf $* $@
 
 ##-----------------------------------------------------------------------
 ## Variables: cleanup
@@ -128,33 +224,25 @@ endif
 
 ## --- clean:  built by 'make'
 CLEANFILES = \
-	$(filter-out acknowledge.pod,$(wildcard *.pod)) \
-	*.dvi *.ps *.pdf \
-	*.log *.aux *.toc *.idx *.tmp *~~
+	*.log *.aux *.toc *.idx *.tmp *~~ \
+	$(BUILD_PODS) \
+	$(BUILD_MAN1_MANS) \
+	$(BUILD_MAN5_MANS) \
+	$(BUILD_DOCS)
 
-if HAVE_POD2MAN
-CLEANFILES += *.man *.1
-endif
-if HAVE_POD2HTML
-CLEANFILES += *.html
-endif
-if HAVE_POD2TEXT
-CLEANFILES += *.txt
-endif
-if HAVE_POD2LATEX
-CLEANFILES += *.tex
-endif
 
 ## --- distclean: built by 'configure'
 DISTCLEANFILES = *.gog
 if HAVE_OPTGEN
-DISTCLEANFILES += *.pod
+DISTCLEANFILES += $(DOC_PODS)
 endif
 
 ## -- maintainerclean: built by maintainer / by hand
 MAINTAINERCLEANFILES = \
 	*~ .*~ Makefile Makefile.in \
-	*.pod *.man *.1 *.html *.txt *.tex *.dvi *.ps *.pdf
+	$(DOC_PODS) \
+	*.man *.1 *.html *.txt *.tex *.dvi *.ps *.pdf
+
 
 ##-----------------------------------------------------------------------
 ## Variables: distribution
@@ -162,8 +250,9 @@ MAINTAINERCLEANFILES = \
 
 ## --- extra distribution files
 EXTRA_DIST = \
-	@DOC_PROG_TXT_TARGETS@  \
-	@DOC_PROG_MAN_TARGETS@  \
+	$(DOC_PODS) \
+	$(DOC_MAN_TARGETS) \
+	$(DOC_HTML_TARGETS) \
 	mootprogs.css
 
 ## --- recursion subdirectories for 'make dist'

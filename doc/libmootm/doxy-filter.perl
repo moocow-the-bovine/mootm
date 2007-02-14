@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 #----------------------------------------------------------------------
 # File: doxy-filter.perl
@@ -24,7 +24,14 @@ GetOptions(
 	   "no-preprocess|no-cpp|np|n"=>sub { $DO_CPP = 0; },
 	   "logfile|l=s"=>\$logfile,
 	   "I=s"=>\@includes,
+
+	   'help|h'=>\$help,
 	  );
+
+if ($help) {
+  print STDERR "Usage: $0 [-(only|no|)-preprocess|-logfile FILE|-IDIR] FILE(s)...\n";
+  exit 0;
+}
 
 $config_cppflags = join(' ', map { "-I$_" } @includes);
 do "doxy-filter.cfg";
@@ -50,7 +57,8 @@ $ppextra = '(?s:\bbison\.h\b)|(?s:\bflexskel\.h\b)';
 # DEBUG
 #-----------------------------------------------------------------------
 #$DEBUG = 2;
-$DEBUG = 1;
+#$DEBUG = 1;
+$DEBUG = 0;
 sub logopen {
   $logfile = 'doxy-filter.log' if (!defined($logfile));
   if ($logfile ne '-') {

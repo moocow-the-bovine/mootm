@@ -482,7 +482,6 @@ if test -z "$OPTGEN_PERL" ; then
   fi
 fi
 
-AC_SUBST(OPTGEN_PERL)
 AC_MSG_NOTICE([setting OPTGEN_PERL=$OPTGEN_PERL])
 AM_CONDITIONAL(HAVE_OPTGEN, [test "$OPTGEN_PERL" != "no"])
 dnl
@@ -504,30 +503,32 @@ AC_ARG_ENABLE(doc,
 
 pkgdocdir="\${docdir}/\${PACKAGE}"
 pkgdocprogdir="\${docdir}/\${PACKAGE}/programs"
+pkgdoclibdir="\${docdir}/\${PACKAGE}/lib\${PACKAGE}"
 
 AC_SUBST(docdir)
 AC_SUBST(pkgdocdir)
 AC_SUBST(pkgdocprogdir)
+AC_SUBST(pkgdoclibdir)
 
 AC_ARG_WITH(doc-formats,
 	AC_HELP_STRING([--with-doc-formats=LIST],
 		       [Build documentation formats in LIST. \
                         Available formats: txt, man, html, dvi, ps, pdf, none. \
-	                Default='txt man html']),
+	                Default='man html']),
 	[ac_cv_doc_formats="$withval"])
 AC_MSG_CHECKING([which documentation formats to build])
 
-## -- set default doc formats if unspecified
+##-- set default doc formats if unspecified
 if test -z "$ac_cv_doc_formats" ; then
-  ac_cv_doc_formats="txt man html"
+  ac_cv_doc_formats="man html"
 fi
 
-## -- un-comma-tize the doc-formats
+##-- un-comma-tize the doc-formats
 mootm_doc_formats=`echo "$ac_cv_doc_formats" | sed 's/\,/ /g'`
 
 
 if test "$enable_doc" != "yes" ; then
- ### disable all docs
+ ##-- disable all docs
  mootm_doc_formats="none"
 fi
 AC_MSG_RESULT([$mootm_doc_formats])
@@ -536,18 +537,52 @@ AC_MSG_RESULT([$mootm_doc_formats])
 AC_ARG_VAR(DOXYGEN,[Path to doxygen documentation generator (disable by setting DOXYGEN=no)])
 
 if test "$mootm_doc_formats" != "none" ; then
-  ### docs: prog doxygen
+  ##-- docs: prog doxygen
   if test -z "$DOXYGEN" ; then
     AC_PATH_PROG(DOXYGEN,doxygen,[no])
   fi
 
-  ###-- report doxygen-check results
+  ##-- report doxygen-check results
   if test -z "$DOXYGEN" -o "$DOXYGEN" = "no"; then
     DOXYGEN="no"
     AC_MSG_WARN([doxygen not found: library documentation will not be built!]) 
   fi
   AC_MSG_NOTICE([setting DOXYGEN=$DOXYGEN])
   AM_CONDITIONAL(HAVE_DOXYGEN, [test "$DOXYGEN" != "no"])
+
+  ##-- doxygen: test for working 'doxy-filter.perl'
+  AC_ARG_VAR(DOXY_FILTER,[doxygen input filter; "no" to disable])
+  AC_MSG_CHECKING([for doxygen input filter])
+  if test -z "$DOXY_FILTER"; then
+    DOXY_SRCDIR="`find ${srcdir}/doc/ -name 'lib*' -print | head -n1`"
+    if test -d "$DOXY_SRCDIR"; then
+      DOXY_SRCDIR=`cd "$DOXY_SRCDIR"; pwd`
+      DOXY_FILTER="$PERL $DOXY_SRCDIR/doxy-filter.perl"
+    else
+      DOXY_FILTER="no"
+    fi
+  fi
+  AC_MSG_RESULT([$DOXY_FILTER])
+
+  if test "$DOXY_FILTER" != "no"; then
+    AC_MSG_CHECKING([whether doxygen input filter works])
+    if test -n "$DOXY_FILTER" && $DOXY_FILTER </dev/null 2>&1 >>config.log ; then
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+      DOXY_FILTER="no"
+    fi
+  fi
+  AC_MSG_NOTICE([setting DOXY_FILTER=$DOXY_FILTER])
+  if test "$DOXY_FILTER" != "no"; then
+    DOXY_INPUT_FILTER="$DOXY_FILTER"
+  else
+    DOXY_INPUT_FILTER=""
+  fi
+  AC_SUBST(DOXY_FILTER)
+  AC_SUBST(DOXY_INPUT_FILTER)
+  AM_CONDITIONAL(HAVE_DOXY_FILTER, [test "$DOXY_FILTER" != "no"])
+
 
   ##-- doxygen: sources
   AC_SUBST(DOXYGEN_SOURCES)
@@ -569,10 +604,6 @@ if test "$mootm_doc_formats" != "none" ; then
   if test -z "$POD2LATEX"; then
      AC_PATH_PROG(POD2LATEX,pod2latex,[no])
   fi
-  AC_SUBST(POD2TEXT)
-  AC_SUBST(POD2MAN)
-  AC_SUBST(POD2HTML)
-  AC_SUBST(POD2LATEX)
   AM_CONDITIONAL(HAVE_POD2TEXT,  [test "$POD2TEXT"  != "no"])
   AM_CONDITIONAL(HAVE_POD2MAN,   [test "$POD2MAN"   != "no"]) 
   AM_CONDITIONAL(HAVE_POD2HTML,  [test "$POD2HTML"  != "no"])
@@ -581,92 +612,74 @@ if test "$mootm_doc_formats" != "none" ; then
   ### -- docs: .gog file linkup
   #mootm_program_gogs="moot.gog mootpp.gog moot-fstgen.gog moot-pargen.gog"
   #mootm_program_gogs="mootpp.gog mootrain.gog moothmm.gog mootm.gog moot.gog"
-  mootm_program_gogs="mootm.gog"
-  for g in $mootm_program_gogs ; do
+  DOC_MAN1_GOGS="mootm.gog"
+  DOC_MAN5_GOGS=""
+  for g in $DOC_MAN1_GOGS $DOC_MAN5_GOGS ; do
     AC_CONFIG_LINKS(doc/programs/${g}:src/programs/${g})  
   done
-  AC_SUBST(mootm_program_gogs)
+  DOC_GOGS="$DOC_MAN1_GOGS $DOC_MAN5_GOGS"
+  AC_SUBST(DOC_MAN1_GOGS)
+  AC_SUBST(DOC_MAN5_GOGS)
+  AC_SUBST(DOC_GOGS)
   AC_CONFIG_LINKS(doc/programs/acknowledge.pod:src/programs/acknowledge.pod)
 
-  ### -- initialize defaults
-  DOC_SUBDIRS=""
-  DOC_LATEX_TARGETS=""
-  DOXY_WANT_HTML="NO"
-  DOXY_WANT_MAN="NO"
-  DOXY_WANT_LATEX="NO"
+  ##-- set "CONFIG_DOC_WANT_*" variables
+  ##   + test with automake conditionals "DOC_WANT_*"
+  CONFIG_DOC_WANT_TXT="no"
+  CONFIG_DOC_WANT_MAN="no"
+  CONFIG_DOC_WANT_HTML="no"
+  CONFIG_DOC_WANT_LATEX="no"
+  CONFIG_DOC_WANT_DVI="no"
+  CONFIG_DOC_WANT_PS="no"
+  CONFIG_DOC_WANT_PDF="no"
+
+  ##-- pod2x: source & target variables (OBSOLETE!)
+  DOC_PROG_POD_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.pod/g'`
+  DOC_PROG_TXT_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.txt/g'`
+  DOC_PROG_MAN_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.1/g'`
+  DOC_PROG_LATEX_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.1/g'`
+  DOC_PROG_HTML_TARGETS="mootprogs.css `echo "$mootm_program_gogs" | sed 's/\.gog/\.html/g'`"
+  DOC_PROG_DVI_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.dvi/g'`
+  DOC_PROG_PS_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.ps/g'`
+  DOC_PROG_PDF_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.pdf/g'`
 
   for fmt in $mootm_doc_formats ; do
     case "$fmt" in
 
       txt)
-	##-- program text docs are pre-built & distributed!
-dnl	if test "$POD2TEXT" != "no" ; then
-	  DOC_PROG_TXT_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.txt/g'`
-dnl	else
-dnl	  AC_MSG_WARN(pod2text not found -- program text docs will not be built!)
-dnl	fi
+        CONFIG_DOC_WANT_TXT="yes"
 	;;
 
       man)
-	if test "$DOXYGEN" != "no" ; then
-	  DOXY_WANT_MAN="YES"
-          DOC_MANDIRS="man/man3"
-          DOC_MAN3_MANS="man/man3/*"
-	fi
-	##-- program manpages are pre-built & distributed!
-dnl	if test "$POD2MAN" != "no" ; then
-	  DOC_PROG_MAN_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.1/g'`
-dnl	else
-dnl	  AC_MSG_WARN(pod2man not found -- program manpages will not be built!)
-dnl	fi
+        CONFIG_DOC_WANT_MAN="yes"
+	#DOXY_WANT_MAN="YES"
+	#DOC_MAN3_MANS="man/man3/*"
 	;;
 
       html)
-	if test "$DOXYGEN" != "no" ; then
-          DOXY_WANT_HTML="YES"
-          DOC_SUBDIRS="$DOC_SUBDIRS html"
-	fi
-	if test "$POD2HTML" != "no"; then
-	  DOC_PROG_HTML_TARGETS="mootprogs.css `echo "$mootm_program_gogs" | sed 's/\.gog/\.html/g'`"
-	else
-	  AC_MSG_WARN(pod2html not found -- program html docs will not be built!)
-	fi
+        CONFIG_DOC_WANT_HTML="yes"
+	#DOXY_WANT_HTML="YES"
+	#DOXY_SUBDIRS="$DOXY_SUBDIRS html"
 	;;
 
       dvi)
-	if test "$DOXYGEN" != "no"; then
-	  DOXY_WANT_LATEX="YES"
-	  DOC_LATEX_TARGETS="${DOC_LATEX_TARGETS} refman.dvi"
-	fi
-	if test "$POD2LATEX" != "no"; then
-	  DOC_PROG_DVI_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.dvi/g'`
-	else
-	  AC_MSG_WARN(pod2latex not found -- program dvi docs will not be built!)
-	fi
+        CONFIG_DOC_WANT_LATEX="yes"
+        CONFIG_DOC_WANT_DVI="yes"
+        #DOXY_WANT_LATEX="yes"
 	;;
 
       ps)
-	if test "$DOXYGEN" != "no" ; then
-	  DOXY_WANT_LATEX="YES"
-	  DOC_LATEX_TARGETS="${DOC_LATEX_TARGETS} refman.ps"
-	fi
-	if test "$POD2LATEX" != "no" ; then
-	  DOC_PROG_PS_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.ps/g'`
-	else
-	  AC_MSG_WARN(pod2latex not found -- program postscript docs will not be built!)
-	fi
+	CONFIG_DOC_WANT_LATEX="yes"
+        CONFIG_DOC_WANT_PS="yes"
+	#DOXY_WANT_LATEX="yes"
+	#DOXY_WANT_PS="yes"
 	;;
 
       pdf)
-	if test "$DOXYGEN" != "no" ; then
-	  DOXY_WANT_LATEX="YES"
-    	  DOC_LATEX_TARGETS="${DOC_LATEX_TARGETS} refman.pdf"
-	fi
-	if test "$POD2LATEX" != "no" ; then
-	  DOC_PROG_PDF_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.pdf/g'`
-	else
-	  AC_MSG_WARN(pod2latex not found -- program pdf docs will not be built!)
-	fi
+        CONFIG_DOC_WANT_LATEX="yes"
+	CONFIG_DOC_WANT_PDF="yes"
+	#DOXY_WANT_LATEX="yes"
+	#DOXY_WANT_PDF="yes"
 	;;
 
       *)
@@ -675,25 +688,36 @@ dnl	fi
     esac; # case "$fmt" in ...
   done; # for fmt in $mootm_doc_formats ...
 
-  AC_SUBST(DOXY_WANT_HTML)
+  ##-- set automake documentation conditionals
+  AM_CONDITIONAL(DOC_WANT_TXT, [test "$CONFIG_DOC_WANT_TXT"  != "no"])
+  AM_CONDITIONAL(DOC_WANT_MAN, [test "$CONFIG_DOC_WANT_MAN"  != "no"])
+  AM_CONDITIONAL(DOC_WANT_HTML,[test "$CONFIG_DOC_WANT_HTML" != "no"])
+  AM_CONDITIONAL(DOC_WANT_LATEX, [test "$CONFIG_DOC_WANT_LATEX"  != "no"])
+  AM_CONDITIONAL(DOC_WANT_DVI, [test "$CONFIG_DOC_WANT_DVI"  != "no"])
+  AM_CONDITIONAL(DOC_WANT_PS,  [test "$CONFIG_DOC_WANT_PS"   != "no"])
+  AM_CONDITIONAL(DOC_WANT_PDF, [test "$CONFIG_DOC_WANT_PDF"  != "no"])
+
+  ##-- Automake conditionals
+  AC_SUBST(CONFIG_DOC_WANT_TXT)
+  AC_SUBST(CONFIG_DOC_WANT_MAN)
+  AC_SUBST(CONFIG_DOC_WANT_HTML)
+  AC_SUBST(CONFIG_DOC_WANT_LATEX)
+  AC_SUBST(CONFIG_DOC_WANT_DVI)
+  AC_SUBST(CONFIG_DOC_WANT_PS)
+  AC_SUBST(CONFIG_DOC_WANT_PDF)
+
+  ##-- doxygen vars (compatibility hack)
+  DOXY_WANT_MAN="$CONFIG_DOC_WANT_MAN"
+  DOXY_WANT_HTML="$CONFIG_DOC_WANT_HTML"
+  DOXY_WANT_LATEX="$CONFIG_DOC_WANT_LATEX"
+  DOXY_WANT_HTMLHELP="NO"
   AC_SUBST(DOXY_WANT_MAN)
+  AC_SUBST(DOXY_WANT_HTML)
   AC_SUBST(DOXY_WANT_LATEX)
-  AC_SUBST(DOC_SUBDIRS)
-  AC_SUBST(DOC_MANDIRS)
-  AC_SUBST(DOC_MAN3_MANS)
-  AC_SUBST(DOC_LATEX_TARGETS)
-  AC_SUBST(POD_DOC_SUFFIXES)
+  AC_SUBST(DOXY_WANT_HTMLHELP)
 
-  AC_SUBST(DOC_PROG_TXT_TARGETS)
-  AC_SUBST(DOC_PROG_MAN_TARGETS)
-  AC_SUBST(DOC_PROG_HTML_TARGETS)
-  AC_SUBST(DOC_PROG_DVI_TARGETS)
-  AC_SUBST(DOC_PROG_PS_TARGETS)
-  AC_SUBST(DOC_PROG_PDF_TARGETS)
-
-
-  # -- check for tag-files (this needs an overhaul!)
-  for ext in moot libFSM ; do
+  ##-- doxygen: check for tag-files (this needs an overhaul!)
+  for ext in moot libFSM gfsm ; do
     extdocdir="`$PKG_CONFIG --variable=pkgdocdir ${ext}`"
     if test -n "$extdocdir" -a "$extdocdir" != "no" ; then
       exttagfiles="`find $extdocdir -name '*.tag'`"
@@ -705,7 +729,9 @@ dnl	fi
       done
     fi
   done 
-  AC_SUBST(DOXY_TAGFILES)   
+  AC_SUBST(DOXY_TAGFILES)
+
+
 fi; # if "$mootm_doc_formats" != "none" ...
 
 
