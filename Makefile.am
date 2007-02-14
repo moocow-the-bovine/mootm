@@ -264,10 +264,12 @@ MAINTAINERCLEANFILES = *~ \
 ## --- extra distribution files
 EXTRA_DIST = \
 	INSTALL \
+	AUTHORS \
+	$(PODS) \
 	$(PODS:.pod=.txt) \
 	$(PODS:.pod=.html) \
 	$(DEBIAN_FILES) \
-	autogen.sh\
+	autogen.sh \
 	configure
 
 ## --- recursion subdirectories for 'make dist'

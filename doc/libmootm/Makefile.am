@@ -56,9 +56,6 @@ endif
 ## --- recursion subdirectories
 #SUBDIRS =
 
-## -- section 3 manpages
-man3_MANS = $(DOXY_MAN3_MANS)
-
 ## --- doxygen hack: doxy config files
 DOXYBASE = libmootm
 DOXYFILE = $(DOXYBASE).doxy
@@ -66,6 +63,9 @@ DOXYFILE = $(DOXYBASE).doxy
 ## --- doxygen hack: doxy stamp files: dependencies
 STAMPFILE = $(DOXYFILE:.doxy=.stamp)
 TAGFILE   = $(DOXYFILE:.doxy=.tag)
+
+## -- section 3 manpages
+man3_MANS = $(DOXY_MAN3_MANS)
 
 all-local: $(STAMPFILE)
 
@@ -85,7 +85,6 @@ DOXY_INPUTS = \
 # Additional dependencies
 #-----------------------------------------------------------------------
 
-
 ## --- doxygen hacks: dependencies
 DOXY_FILTER_DEPS=
 
@@ -103,7 +102,10 @@ endif
 # doxygen hack: build rules (recurse in this directory)
 #-----------------------------------------------------------------------
 doxy-filter.cfg:
-	echo -e '$$config_cppflags .= "$(patsubst %,-I%,$(DOXY_INCLUDES))";\n1;' > doxy-filter.cfg
+	echo '$$config_cppflags .= "-C -x c++ $(patsubst %,-I%,$(DOXY_INCLUDES))";' > $@
+	echo '$$config_cpp    = "$(CXXCPP)";' >> $@
+	echo '$$config_tmpdir = "$(PWD)";'    >> $@
+	echo '1;' >> $@
 
 if HAVE_DOXYGEN
 .doxy.stamp: doxy-filter.cfg @srcdir@/libmoot.css

@@ -459,7 +459,6 @@ AC_ARG_VAR(OPTGEN_PERL, [Path to the 'optgen.perl' script (disable with OPTGEN_P
 
 ##-- test for working optgen.perl
 AC_MSG_CHECKING([whether Getopt::Gen works])
-  #if $OPTGEN_PERL --version >>config.log 2>&1 ; then
   if $PERL -MGetopt::Gen -e'exit 0;' >>config.log 2>&1; then
   AC_MSG_RESULT([yes])
 else
@@ -633,55 +632,31 @@ if test "$mootm_doc_formats" != "none" ; then
   CONFIG_DOC_WANT_PS="no"
   CONFIG_DOC_WANT_PDF="no"
 
-  ##-- pod2x: source & target variables (OBSOLETE!)
-  DOC_PROG_POD_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.pod/g'`
-  DOC_PROG_TXT_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.txt/g'`
-  DOC_PROG_MAN_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.1/g'`
-  DOC_PROG_LATEX_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.1/g'`
-  DOC_PROG_HTML_TARGETS="mootprogs.css `echo "$mootm_program_gogs" | sed 's/\.gog/\.html/g'`"
-  DOC_PROG_DVI_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.dvi/g'`
-  DOC_PROG_PS_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.ps/g'`
-  DOC_PROG_PDF_TARGETS=`echo "$mootm_program_gogs" | sed 's/\.gog/\.pdf/g'`
-
+  ##-- check requested formats
   for fmt in $mootm_doc_formats ; do
     case "$fmt" in
 
       txt)
         CONFIG_DOC_WANT_TXT="yes"
 	;;
-
       man)
         CONFIG_DOC_WANT_MAN="yes"
-	#DOXY_WANT_MAN="YES"
-	#DOC_MAN3_MANS="man/man3/*"
 	;;
-
       html)
         CONFIG_DOC_WANT_HTML="yes"
-	#DOXY_WANT_HTML="YES"
-	#DOXY_SUBDIRS="$DOXY_SUBDIRS html"
 	;;
-
       dvi)
         CONFIG_DOC_WANT_LATEX="yes"
         CONFIG_DOC_WANT_DVI="yes"
-        #DOXY_WANT_LATEX="yes"
 	;;
-
       ps)
 	CONFIG_DOC_WANT_LATEX="yes"
         CONFIG_DOC_WANT_PS="yes"
-	#DOXY_WANT_LATEX="yes"
-	#DOXY_WANT_PS="yes"
 	;;
-
       pdf)
         CONFIG_DOC_WANT_LATEX="yes"
 	CONFIG_DOC_WANT_PDF="yes"
-	#DOXY_WANT_LATEX="yes"
-	#DOXY_WANT_PDF="yes"
 	;;
-
       *)
 	AC_MSG_WARN(ignoring unknown documentation format: $fmt)
 	;;
@@ -697,7 +672,7 @@ if test "$mootm_doc_formats" != "none" ; then
   AM_CONDITIONAL(DOC_WANT_PS,  [test "$CONFIG_DOC_WANT_PS"   != "no"])
   AM_CONDITIONAL(DOC_WANT_PDF, [test "$CONFIG_DOC_WANT_PDF"  != "no"])
 
-  ##-- Automake conditionals
+  ##-- automake conditionals: indicator values
   AC_SUBST(CONFIG_DOC_WANT_TXT)
   AC_SUBST(CONFIG_DOC_WANT_MAN)
   AC_SUBST(CONFIG_DOC_WANT_HTML)
