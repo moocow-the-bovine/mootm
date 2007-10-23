@@ -151,7 +151,11 @@ namespace mootm {
 				    params->gstr,
 				    params->warn_on_undefined,
 				    params->att_style);
+#ifdef GFSM_WEIGHT_IS_UNION
+    params->tokp->insert(mootToken::Analysis(params->gstr->str,"",path->w.f));
+#else
     params->tokp->insert(mootToken::Analysis(params->gstr->str,"",path->w));
+#endif
 
     return FALSE;
   };
