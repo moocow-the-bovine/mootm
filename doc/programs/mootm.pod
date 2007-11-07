@@ -1,0 +1,444 @@
+
+=pod
+
+=head1 NAME
+
+mootm - Morphological analyzer for moocow's part-of-speech tagger.
+
+
+
+=head1 SYNOPSIS
+
+mootm [OPTIONS] INPUT(s)
+
+ Arguments:
+    INPUT(s)  Input files / file-lists / words.
+
+ Options
+    -h        --help           Print help and exit.
+    -V        --version        Print version and exit.
+    -cFILE    --rcfile=FILE    Read an alternate configuration file.
+    -vLEVEL   --verbose=LEVEL  Verbosity level.
+    -dNTOKS   --dots=NTOKS     Print a dot for every NTOKS tokens processed.
+    -w        --words          INPUTs are input tokens, not filenames.
+    -l        --list           INPUTs are file-lists, not filenames.
+    -oFILE    --output=FILE    Specify output file (default=stdout).
+
+ I/O Format Options
+    -a        --avm            Produce AVM ('vector') output.
+    -r        --reanalyze      Force re-analysis of pre-analyzed tokens.
+    -1        --first-is-best  Assume 1st analysis is 'best' for each input token.
+    -2        --ignore-first   Ignore the first analysis for each input token.
+
+ Morphology Options
+    -sFILE    --symbols=FILE   Specify morphological symbols file.
+    -mFILE    --morph=FILE     Specify morphological transducer.
+    -eSTRING  --eow=STRING     Specify implicit EOW string.
+
+=cut
+
+###############################################################
+# Description
+###############################################################
+=pod
+
+=head1 DESCRIPTION
+
+Morphological analyzer for moocow's part-of-speech tagger.
+
+
+'mootm' is a morphological analyzer
+program based on the 'libmoot' library, using Thomas
+Hanneforth's FSM library for representation and manipulation
+of the underlying finite-state machines.
+
+It takes as its input one or more 'rare' or 'medium' (+/-tagged,-analyzed)
+text files, and outputs 'medium rare' or 'well done' (+analzed) text files,
+respectively.  See mootfiles(5) for details on moot file formats.
+
+
+=cut
+
+###############################################################
+# Arguments
+###############################################################
+=pod
+
+=head1 ARGUMENTS
+
+=over 4
+
+=item C<INPUT(s)>
+
+Input files / file-lists / words.
+
+See the '--list' and '--words' options.
+
+=back
+
+
+
+=cut
+
+
+###############################################################
+# Options
+###############################################################
+=pod
+
+=head1 OPTIONS
+
+=over 4
+
+=item C<--help> , C<-h>
+
+Print help and exit.
+
+Default: '0'
+
+
+
+
+=item C<--version> , C<-V>
+
+Print version and exit.
+
+Default: '0'
+
+
+
+
+=item C<--rcfile=FILE> , C<-cFILE>
+
+Read an alternate configuration file.
+
+Default: 'NULL'
+
+See also: L<CONFIGURATION FILES>.
+
+
+
+
+=item C<--verbose=LEVEL> , C<-vLEVEL>
+
+Verbosity level.
+
+Default: '3'
+
+
+Be more or less verbose.  Recognized values are in the range 0..5:
+
+=over 4
+
+=item * 0
+
+Be as silent as possbile.
+
+=item * 1
+
+Report runtime errors.
+
+=item * 2
+
+Report basic progess to stderr.
+
+=item * 3
+
+Report summary and timing information to stderr.
+
+=item * 4
+
+Report runtime warnings.
+
+=item * 6
+
+Report everything.
+
+=back
+
+
+
+
+
+
+=item C<--dots=NTOKS> , C<-dNTOKS>
+
+Print a dot for every NTOKS tokens processed.
+
+Default: '0'
+
+Zero (the default) means that no dots will be printed.
+
+
+
+
+=item C<--words> , C<-w>
+
+INPUTs are input tokens, not filenames.
+
+Default: '0'
+
+Useful for testing.
+
+
+
+
+=item C<--list> , C<-l>
+
+INPUTs are file-lists, not filenames.
+
+Default: '0'
+
+Useful for large batch-processing jobs.
+
+
+
+
+=item C<--output=FILE> , C<-oFILE>
+
+Specify output file (default=stdout).
+
+Default: '-'
+
+
+
+
+=back
+
+=cut
+
+#--------------------------------------------------------------
+# Option-Group I/O Format Options
+#--------------------------------------------------------------
+=pod
+
+=head2 I/O Format Options
+
+=over 4
+
+=item C<--avm> , C<-a>
+
+Produce AVM ('vector') output.
+
+Default: '0'
+
+Ambiguous-mode only
+
+
+
+
+=item C<--reanalyze> , C<-r>
+
+Force re-analysis of pre-analyzed tokens.
+
+Default: '0'
+
+Useful if you want to add additional analyses to preprocessor output.
+
+
+
+
+=item C<--first-is-best> , C<-1>
+
+Assume 1st analysis is 'best' for each input token.
+
+Default: '0'
+
+Useful for re-analysis & class-based training with mootrain(1).
+
+
+
+
+=item C<--ignore-first> , C<-2>
+
+Ignore the first analysis for each input token.
+
+Default: '0'
+
+Useful for re-analysis & class-based training with mootrain(1).
+
+
+
+
+=back
+
+=cut
+
+#--------------------------------------------------------------
+# Option-Group Morphology Options
+#--------------------------------------------------------------
+=pod
+
+=head2 Morphology Options
+
+=over 4
+
+=item C<--symbols=FILE> , C<-sFILE>
+
+Specify morphological symbols file.
+
+Environment Variable: 'moot_SYMBOLS'
+
+Default: 'moot.sym'
+
+
+This symbols file will be used to analyze input-tokens and
+to generate output strings.
+
+
+
+
+
+=item C<--morph=FILE> , C<-mFILE>
+
+Specify morphological transducer.
+
+Environment Variable: 'moot_MORPH'
+
+Default: 'moot.fst'
+
+
+This file should contain a finite-state transducer to be
+used for morphological analysis.
+
+
+
+
+
+=item C<--eow=STRING> , C<-eSTRING>
+
+Specify implicit EOW string.
+
+Environment Variable: 'moot_EOW'
+
+Default: ''
+
+
+If specified, STRING is an end-of-word marker which
+will be implicitly appended to the text of each input token
+before transducer lookup.
+
+
+
+
+
+=back
+
+
+
+
+=cut
+
+###############################################################
+# configuration files
+###############################################################
+=pod
+
+=head1 CONFIGURATION FILES
+
+Configuration files are expected to contain lines of the form:
+
+    LONG_OPTION_NAME    OPTION_VALUE
+
+where LONG_OPTION_NAME is the long name of some option,
+without the leading '--', and OPTION_VALUE is the value for
+that option, if any.  Fields are whitespace-separated.
+Blank lines and comments (lines beginning with '#')
+are ignored.
+
+The following configuration files are read by default:
+
+=over 4
+
+=item * /etc/mootmrc
+
+=item * ~/.mootmrc
+
+=back
+
+=cut
+
+
+
+###############################################################
+# Addenda
+###############################################################
+=pod
+
+=head1 ADDENDA
+
+
+
+=head2 About this Document
+
+Documentation file auto-generated by optgen.perl version 0.06
+using Getopt::Gen version 0.11.
+Translation was initiated
+as:
+
+   optgen.perl -l --notimestamp --nocfile --nohfile -F mootm mootm.gog
+
+=cut
+
+
+###############################################################
+# Bugs
+###############################################################
+=pod
+
+=head1 BUGS AND LIMITATIONS
+
+
+
+Probably many.
+
+
+
+=cut
+
+###############################################################
+# Footer
+###############################################################
+=pod
+
+=head1 ACKNOWLEDGEMENTS
+
+
+Development of this package was supported by the project
+'Kollokationen im Wörterbuch'
+( "collocations in the dictionary", http://www.bbaw.de/forschung/kollokationen )
+in association with the project
+'Digitales Wörterbuch der deutschen Sprache des 20. Jahrhunderts (DWDS)'
+( "digital dictionary of the German language of the 20th century", http://www.dwds.de )
+at the Berlin-Brandenburgische Akademie der Wissenschaften ( http://www.bbaw.de )
+with funding from
+the Alexander von Humboldt Stiftung ( http://www.avh.de )
+and from the Zukunftsinvestitionsprogramm of the
+German federal government.
+
+I am grateful to Christiane Fellbaum, Alexander Geyken,
+Gerald Neumann, Edmund Pohl, Alexey Sokirko, and others
+for offering useful insights in the course of development
+of this package.
+
+Thomas Hanneforth wrote and maintains the libFSM C++ library
+for finite-state device operations used by this package.
+
+Alexander Geyken and Thomas Hanneforth developed the
+rule-based morphological analysis system for German
+which was used in the development and testing of this
+package.
+
+
+=head1 AUTHOR
+
+Bryan Jurish E<lt>moocow@ling.uni-potsdam.deE<gt>
+
+=head1 SEE ALSO
+
+mootpp(1), moot(1), mootfiles(5)
+
+=cut
+
+
+

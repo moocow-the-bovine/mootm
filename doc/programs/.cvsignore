@@ -1,15 +1,5 @@
 *.tmp
 other
-mootrain.pod
-dwdspp.pod
-mootpp.pod
-moot.pod
-dwdsm.pod
-mootm.pod
-moot-pargen.pod
-moot-fstgen.pod
-dwdshmm.pod
-moothmm.pod
 *.gog
 *.html
 *.txt

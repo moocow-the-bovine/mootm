@@ -162,7 +162,7 @@ pdf: $(DOC_PDF_TARGETS)
 
 .SECONDARY:
 
-OPTGENFLAGS = -l
+OPTGENFLAGS = -l --notimestamp
 
 if HAVE_OPTGEN
 .gog.pod:
