@@ -2,7 +2,7 @@
 
 /*
    libmootm : moocow's morphology library:
-   Copyright (C) 2003-2005 by Bryan Jurish <moocow@ling.uni-potsdam.de>
+   Copyright (C) 2003-2007 by Bryan Jurish <moocow@ling.uni-potsdam.de>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -26,8 +26,8 @@
  *   + mootm FSMs: GNU gfsm
  *----------------------------------------------------------------------*/
 /**
- * \file mootFSMPotsdam.h
- * \brief Finite state devices using Potsdam libFSM
+ * \file mootFSMgfsm.h
+ * \brief Finite state devices using libgfsm
  */
 #ifndef _moot_FSM_GFSM_H
 #define _moot_FSM_GFSM_H
