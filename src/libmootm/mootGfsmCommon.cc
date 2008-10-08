@@ -1,7 +1,7 @@
 /*-*- Mode: C++ -*-*/
 
 /*
-   libmootm : moocow's morphology library
+   libmootm : moocow's morphology library:
    Copyright (C) 2003-2008 by Bryan Jurish <moocow@ling.uni-potsdam.de>
 
    This library is free software; you can redistribute it and/or
@@ -20,24 +20,53 @@
 */
 
 /*----------------------------------------------------------------------
- * Name: mootFSMBase.cc
+ * Name: mootGfsmCommon.cc
  * Author: Bryan Jurish <moocow@ling.uni-potsdam.de>
  * Description:
- *   + moo FSMs: abstract base class
+ *   + moot FSMs: libgfsm, libgfsmxl common
  *----------------------------------------------------------------------*/
 
-#include <mootFSMBase.h>
+#include <mootGfsmCommon.h>
+
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
+
+#ifdef HAVE_CONFIG_H
+# include <mootmUnConfig.h>
+# include <mootmConfig.h>
+#endif
+
+#if defined(USE_FSM_GFSM) || defined(USE_FSM_GFSMXL)
 
 namespace mootm {
+  using namespace std;
+  using namespace moot;
 
-void mootFSMBase::carp(const char *fmt, ...) const
-{
-  va_list ap;
-  va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
-  va_end(ap);
-};
+
+  /*------------------------------------------------------------------------*/
+  gboolean _mootGfsmCommon_analyze_token_foreach_func(gfsmPath *path,
+						      gpointer value_dummy,
+						      struct _mootGfsmCommon_analyze_token_params *params)
+  {
+    g_string_truncate(params->gstr,0);
+    gfsm_alphabet_labels_to_gstring(params->abet,
+				    path->hi,
+				    params->gstr,
+				    params->warn_on_undefined,
+				    params->att_style);
+#ifdef GFSM_WEIGHT_IS_UNION
+    params->tokp->insert(mootToken::Analysis(params->gstr->str,"",path->w.f));
+#else
+    params->tokp->insert(mootToken::Analysis(params->gstr->str,"",path->w));
+#endif
+
+    return FALSE;
+  };
+
 
 }; //-- namespace mootm
+
+
+#endif /* defined(USE_FSM_GFSM) || defined(USE_FSM_GFSMXL) */

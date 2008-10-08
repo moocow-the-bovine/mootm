@@ -2,7 +2,7 @@
 
 /*
    libmootm : moocow's morphology library
-   Copyright (C) 2003-2005 by Bryan Jurish <moocow@ling.uni-potsdam.de>
+   Copyright (C) 2003-2008 by Bryan Jurish <moocow@ling.uni-potsdam.de>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -142,7 +142,7 @@ bool mootMorph::analyze_strings(int argc, char **argv, FILE *out, const char *sr
  * Error reporting
  *--------------------------------------------------------------------------*/
 
-void mootMorph::carp(char *fmt, ...) const
+void mootMorph::carp(const char *fmt, ...) const
 {
   if (verbose >= vlErrors) {
     va_list ap;

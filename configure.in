@@ -3,7 +3,7 @@ AC_PREREQ(2.5)
 
 dnl Some handy macros
 define([THE_PACKAGE_NAME],    [mootm])
-define([THE_PACKAGE_VERSION], [2.0.6])
+define([THE_PACKAGE_VERSION], [2.0.7-pre1])
 define([THE_PACKAGE_AUTHOR],  [moocow@ling.uni-potsdam.de])
 
 AC_INIT(THE_PACKAGE_NAME, THE_PACKAGE_VERSION, THE_PACKAGE_AUTHOR)
@@ -134,9 +134,10 @@ dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 dnl ------------------------------------------------------------
-dnl Which FSM lib? : ac_cv_fsm_which = "gfsm" | "potsdam" | "rwth"(broken)
+dnl Which FSM lib? : ac_cv_fsm_which = | "gfsm" | "potsdam" | "rwth"(broken) | "gfsmxl"(broken)
+dnl + TODO: OpenFst
 
-ac_cv_fsm_try="gfsm,potsdam,rwth"
+ac_cv_fsm_try="gfsm,potsdam,rwth,gfsmxl"
 ac_cv_fsm_which=""
 
 
@@ -160,10 +161,10 @@ fsm_which_libs="`echo $ac_cv_fsm_try | sed 's/\,/ /g'`"
 for fsm_lib in $fsm_which_libs ; do
   case "$fsm_lib" in
 
-    potsdam)
-      PKG_CHECK_MODULES(FSMLIB, libFSM >= 0.9.0.1, [HAVE_FSMLIB="yes"], [HAVE_FSMLIB=""])
-      if test "$HAVE_FSMLIB" = "yes" ; then
-        ac_cv_fsm_which="potsdam"
+    gfsmxl)
+      PKG_CHECK_MODULES(GFSM, gfsmxl >= 0.0.6, [HAVE_GFSMXL="yes"], [HAVE_GFSMXL=""])
+      if test "$HAVE_GFSMXL" = "yes" ; then
+        ac_cv_fsm_which="gfsmxl"
 	break
       fi
       ;;
@@ -172,6 +173,14 @@ for fsm_lib in $fsm_which_libs ; do
       PKG_CHECK_MODULES(GFSM, gfsm >= 0.0.8, [HAVE_GFSM="yes"], [HAVE_GFSM=""])
       if test "$HAVE_GFSM" = "yes" ; then
         ac_cv_fsm_which="gfsm"
+	break
+      fi
+      ;;
+
+    potsdam)
+      PKG_CHECK_MODULES(FSMLIB, libFSM >= 0.9.0.1, [HAVE_FSMLIB="yes"], [HAVE_FSMLIB=""])
+      if test "$HAVE_FSMLIB" = "yes" ; then
+        ac_cv_fsm_which="potsdam"
 	break
       fi
       ;;
@@ -236,12 +245,20 @@ case "$ac_cv_fsm_which" in
 	     [Human-readable name of the underlying finite-state library])
    ;;
 
+ gfsmxl)
+   AC_MSG_RESULT([libgfsmxl])
+   AC_DEFINE([USE_FSM_GFSMXL],1,
+	     [Define this to use the LGPL libgfsmxl library])
+   AC_DEFINE([MOOTM_FSM_LIBRARY],["libgfsmxl"],
+             [Human-readable name of the underlying finite-state library])
+   ;;
+
  gfsm)
    AC_MSG_RESULT([libgfsm])
    AC_DEFINE([USE_FSM_GFSM],1,
 	     [Define this to use the LGPL libgfsm library])
    AC_DEFINE([MOOTM_FSM_LIBRARY],["libgfsm"],
-	     [Human-readable name of the underlying finite-state library])
+             [Human-readable name of the underlying finite-state library])
    ;;
 
  rwth)
@@ -269,6 +286,35 @@ dnl Which FSM lib?
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 dnl ------------------------------------------------------------
+dnl FSM: gfsmxl
+
+if test "$ac_cv_fsm_which" = "gfsmxl" ; then
+
+  CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I gfsmxl`"
+  LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L gfsmxl`"
+  FSM_LIBS="`$PKG_CONFIG --libs-only-l gfsmxl` $LIBS"
+
+fi ##-- test "$ac_cv_fsm_which" = "gfsmxl"
+
+dnl FSM: gfsmxl
+dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+dnl ------------------------------------------------------------
+dnl FSM: gfsm
+
+if test "$ac_cv_fsm_which" = "gfsm" ; then
+
+  CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I gfsm`"
+  LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L gfsm`"
+  FSM_LIBS="`$PKG_CONFIG --libs-only-l gfsm` $LIBS"
+
+fi ##-- test "$ac_cv_fsm_which" = "gfsm"
+
+dnl FSM: gfsm
+dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+dnl ------------------------------------------------------------
 dnl FSM: Potsdam libFSM
 dnl
 if test "$ac_cv_fsm_which" = "potsdam" ; then
@@ -285,21 +331,6 @@ fi ##-- test "$ac_cv_fsm_which" = "potsdam"
 
 dnl FSM: Potsdam libFSM
 dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-dnl ------------------------------------------------------------
-dnl FSM: GNU gfsm
-
-if test "$ac_cv_fsm_which" = "gfsm" ; then
-
- CPPFLAGS="$CPPFLAGS `$PKG_CONFIG --cflags-only-I gfsm`"
- LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L gfsm`"
- FSM_LIBS="`$PKG_CONFIG --libs-only-l gfsm` $LIBS"
-
-fi ##-- test "$ac_cv_fsm_which" = "potsdam"
-
-dnl FSM: GNU gfsm
-dnl ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 
 
 dnl ------------------------------------------------------------
@@ -692,7 +723,7 @@ if test "$mootm_doc_formats" != "none" ; then
   AC_SUBST(DOXY_WANT_HTMLHELP)
 
   ##-- doxygen: check for tag-files (this needs an overhaul!)
-  for ext in moot libFSM gfsm ; do
+  for ext in moot gfsm gfsmxl libFSM ; do
     extdocdir="`$PKG_CONFIG --variable=pkgdocdir ${ext}`"
     if test -n "$extdocdir" -a "$extdocdir" != "no" ; then
       exttagfiles="`find $extdocdir -name '*.tag'`"

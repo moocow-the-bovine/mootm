@@ -2,7 +2,7 @@
 
 /*
    libmootm : moocow's morphology library:
-   Copyright (C) 2003-2008 by Bryan Jurish <moocow@ling.uni-potsdam.de>
+   Copyright (C) 2008 by Bryan Jurish <moocow@ling.uni-potsdam.de>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -20,13 +20,13 @@
 */
 
 /*----------------------------------------------------------------------
- * Name: mootFSMgfsm.cc
+ * Name: mootFSMgfsmxl.cc
  * Author: Bryan Jurish <moocow@ling.uni-potsdam.de>
  * Description:
- *   + moot FSMs: libgfsm
+ *   + moot FSMs: libgfsmxl + libgfsm
  *----------------------------------------------------------------------*/
 
-#include <mootFSMgfsm.h>
+#include <mootFSMgfsmxl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,7 +38,7 @@
 # include <mootmConfig.h>
 #endif
 
-#if defined(USE_FSM_GFSM)
+#if defined(USE_FSM_GFSMXL)
 
 namespace mootm {
   using namespace std;
@@ -134,7 +134,7 @@ namespace mootm {
     analyze_params.att_style = want_avm;
     analyze_params.tokp = &tok;
 
-    gfsm_set_foreach(paths, (GTraverseFunc)_mootGfsmCommon_analyze_token_foreach_func, &analyze_params);
+    gfsm_set_foreach(paths, (GTraverseFunc)_mootFSMgfsm_analyze_token_foreach_func, &analyze_params);
 
     return tok;
   };
@@ -143,4 +143,4 @@ namespace mootm {
 }; //-- namespace mootm
 
 
-#endif /* defined(USE_FSM_GFSM) */
+#endif /* defined(USE_FSM_GFSMXL) */

@@ -2,7 +2,7 @@
 
 /*
    libmootm : moocow's morphology library:
-   Copyright (C) 2003-2007 by Bryan Jurish <moocow@ling.uni-potsdam.de>
+   Copyright (C) 2008 by Bryan Jurish <moocow@ling.uni-potsdam.de>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -20,38 +20,40 @@
 */
 
 /*----------------------------------------------------------------------
- * Name: mootFSMgfsm.h
+ * Name: mootFSMgfsmxl.h
  * Author: Bryan Jurish <moocow@ling.uni-potsdam.de>
  * Description:
- *   + mootm FSMs: GNU gfsm
+ *   + mootm FSMs: gfsmxl + gfsm
  *----------------------------------------------------------------------*/
 /**
- * \file mootFSMgfsm.h
- * \brief Finite state devices using libgfsm
+ * \file mootFSMgfsmxl.h
+ * \brief Finite state devices using libgfsmxl and libgfsm
  */
-#ifndef _moot_FSM_GFSM_H
-#define _moot_FSM_GFSM_H
+#ifndef _moot_FSM_GFSMXL_H
+#define _moot_FSM_GFSMXL_H
 
 #ifdef HAVE_CONFIG_H
 # include <mootmUnConfig.h>
 # include <mootmConfig.h>
 #endif
 
-#if defined(USE_FSM_GFSM)
+#if defined(USE_FSM_GFSMXL)
 
 #include <mootFSMBase.h>
 #include <mootGfsmCommon.h>
 
 extern "C" {
-#include <gfsm.h>
+#include <gfsmxl.h>
 }
+
+#error "libgfsmxl support is not yet implemented!"
 
 namespace mootm {
   using namespace std;
   using namespace moot;
 
   /** The real underlying library selection is this typedef */
-  typedef class mootFSMgfsm mootFSM;
+  typedef class mootFSMgfsmxl mootFSM;
 
 
   /*------------------------------------------------------------
@@ -59,9 +61,9 @@ namespace mootm {
    */
 
   /**
-   * \brief finite-state transducer class using libgfsm
+   * \brief finite-state transducer class using libgfsmxl
    */
-  class mootFSMgfsm : public mootFSMBase {
+  class mootFSMgfsmxl : public mootFSMBase {
   protected:
     /*------------------------------------------------------------
      * protected data
@@ -80,7 +82,7 @@ namespace mootm {
      * public methods
      */
     /** Default constructor */
-    mootFSMgfsm(void)
+    mootFSMgfsmxl(void)
       : abet_lo(NULL),
 	abet_hi(NULL),
 	mfst(NULL),
@@ -96,7 +98,7 @@ namespace mootm {
     };
 
     /** Default destructor */
-    ~mootFSMgfsm(void) {
+    ~mootFSMgfsmxl(void) {
       if (abet_lo)                       gfsm_alphabet_free(abet_lo);
       if (abet_hi && abet_hi != abet_lo) gfsm_alphabet_free(abet_hi);
       if (mfst) gfsm_automaton_free(mfst);
@@ -120,13 +122,13 @@ namespace mootm {
 				     bool want_avm=true,
 				     bool want_warnings=true);
 
-  }; // class mootFSMgfsm
+  }; // class mootFSMgfsmxl
 
 
 
 }; // namespace mootm
 
-#endif /* defined(USE_FSM_GFSM) */
+#endif /* defined(USE_FSM_GFSMXL) */
 
 
 #ifdef HAVE_CONFIG_H
@@ -134,4 +136,4 @@ namespace mootm {
 #endif
 
 
-#endif /* _moot_FSM_GFSM_H */
+#endif /* _moot_FSM_GFSMXL_H */

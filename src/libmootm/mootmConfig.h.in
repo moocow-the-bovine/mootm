@@ -66,6 +66,9 @@
 /* Define this to use the LGPL libgfsm library */
 #undef USE_FSM_GFSM
 
+/* Define this to use the LGPL libgfsmxl library */
+#undef USE_FSM_GFSMXL
+
 /* Define this to use the Potsdam libFSM library */
 #undef USE_FSM_POTSDAM
 

@@ -17,7 +17,7 @@ pkgdocdir=@pkgdocdir@
 
 cppflags=-I@spkgincludedir@ @CPPFLAGS@
 cxxflags=@CXXFLAGS@
-ldadd=-lmootm @LIBS@
+ldadd=-lmootm @FSM_LIBS@ @LIBS@
 ldadd_static=@FSM_LDADD_STATIC@
 
 

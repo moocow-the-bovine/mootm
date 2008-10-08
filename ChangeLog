@@ -1,5 +1,9 @@
 ChangeLog for package mootm
 
+2.0.7 Wed, 08 Oct 2008 11:41:18 +0200
+        + starting adding support for gfsmxl cascade morphologies (still broken)
+	+ TODO: add support for other fsm libs: FSM<2.x>, OpenFst, ...
+
 2.0.6 Tue, 13 Feb 2007 13:31:07 +0100
         + added support for implicit EOW markers
 	+ updated autobuild system to enable cleaner builds for non-development environments

@@ -13,6 +13,7 @@
 *.loT
 mootmConfig.h
 mootmConfig.h.in
+mootmUnConfig.h
 mootPPLexer.cc
 mootPPLexer.h
 mootTaggerLexer.cc
