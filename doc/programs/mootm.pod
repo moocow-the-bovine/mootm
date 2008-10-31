@@ -130,27 +130,31 @@ Be more or less verbose.  Recognized values are in the range 0..5:
 
 =over 4
 
-=item * 0
+=item 0
 
 Be as silent as possbile.
 
-=item * 1
+=item 1
 
 Report runtime errors.
 
-=item * 2
+=item 2
 
 Report basic progess to stderr.
 
-=item * 3
+=item 3
 
 Report summary and timing information to stderr.
 
-=item * 4
+=item 4
 
 Report runtime warnings.
 
-=item * 6
+=item 5
+
+?currently unused?
+
+=item 6
 
 Report everything.
 
