@@ -96,6 +96,7 @@ bool mootMorph::analyze_stream(FILE *in, FILE *out, const char *srcname)
 
   int ifmt = ignore_first_analysis  ? tiofWellDone : tiofMediumRare;
   int ofmt = first_analysis_is_best ? tiofWellDone : tiofMediumRare;
+  ofmt |= tiofCost;
 
   //tr.lexer.ignore_first_analysis = ignore_first_analysis;
   TokenReaderNative tr(ifmt);
@@ -120,7 +121,7 @@ bool mootMorph::analyze_strings(int argc, char **argv, FILE *out, const char *sr
 
   // -- ye olde guttes
   mootSentence sent;
-  TokenWriterNative twriter(tiofMediumRare);
+  TokenWriterNative twriter(tiofMediumRare|tiofCost);
   twriter.to_file(out);
   mootToken tok;
   for ( ; --argc >= 0; argv++) {
