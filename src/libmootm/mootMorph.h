@@ -2,7 +2,7 @@
 
 /*
    libmootm : moocow's morphology library
-   Copyright (C) 2003-2008 by Bryan Jurish <moocow@ling.uni-potsdam.de>
+   Copyright (C) 2003-2010 by Bryan Jurish <jurish@uni-potsdam.de>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -102,6 +102,9 @@ public:
   /** End-of-word string, "" for none */
   std::string eow_str;
 
+  /** Honor AT&T-style escapes in input strings (default = false) */
+  bool want_att_escapes;
+
   /** Generate output strings in AVM (madwds-"vector") mode? (default = false) */
   bool want_avm;
 
@@ -154,6 +157,7 @@ public:
   /** constructor */
   mootMorph(void) :
     eow_str(""),
+    want_att_escapes(false),
     want_avm(false),
     force_reanalysis(false),
     first_analysis_is_best(false),
@@ -214,10 +218,10 @@ public:
   {
     //-- analyze
     if (eow_str == "") {
-      mfsm.analyze_token(tok, want_avm, (verbose >= vlWarnings));
+      mfsm.analyze_token(tok, want_att_escapes, want_avm, (verbose >= vlWarnings));
     } else {
       tok.textAppend(eow_str);
-      mfsm.analyze_token(tok, want_avm, (verbose >= vlWarnings));
+      mfsm.analyze_token(tok, want_att_escapes, want_avm, (verbose >= vlWarnings));
       tok.tok_text.erase( tok.tok_text.end()-eow_str.size(), tok.tok_text.end() );
     }
 

@@ -2,7 +2,7 @@
 
 /*
    libmootm : moocow's morphology library:
-   Copyright (C) 2008 by Bryan Jurish <moocow@ling.uni-potsdam.de>
+   Copyright (C) 2008-2010 by Bryan Jurish <jurish@uni-potsdam.de>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -119,6 +119,7 @@ namespace mootm {
 
     /** Analyze a single mootToken in-place */
     virtual mootToken& analyze_token(mootToken &tok,
+				     bool want_att_escapes=false,
 				     bool want_avm=true,
 				     bool want_warnings=true);
 

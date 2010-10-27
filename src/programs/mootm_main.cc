@@ -1,6 +1,6 @@
 /*
    mootm  : moocow's part-of-speech tagger : morphology
-   Copyright (C) 2002-2008 by Bryan Jurish <moocow@ling.uni-potsdam.de>
+   Copyright (C) 2002-2010 by Bryan Jurish <jurish@uni-potsdam.de>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -125,7 +125,7 @@ void GetMyOptions(int argc, char **argv)
   //-- show banner
   if (args.verbose_arg >= vlProgress)
     fprintf(stderr,
-	    "%s version %s by Bryan Jurish <moocow@ling.uni-potsdam.de>\n\n",
+	    "%s version %s by Bryan Jurish <jurish@uni-potsdam.de>\n\n",
 	    PROGNAME, VERSION);
 
   //-- output file
@@ -146,7 +146,8 @@ void GetMyOptions(int argc, char **argv)
 
   //-- mophology object setup: flags
   morph.eow_str                = args.eow_arg;
-  morph.want_avm               = args.avm_given;
+  morph.want_att_escapes       = args.escapes_given;
+  morph.want_avm               = args.att_given;
   morph.force_reanalysis       = args.reanalyze_given;
   morph.first_analysis_is_best = args.first_is_best_given;
   morph.ignore_first_analysis  = args.ignore_first_given;

@@ -25,7 +25,8 @@ mootm [OPTIONS] INPUT(s)
     -oFILE    --output=FILE    Specify output file (default=stdout).
 
  I/O Format Options
-    -a        --avm            Produce AVM ('vector') output.
+    -E        --escapes        Honor AT&T regex escapes in input.
+    -a        --att            Produce AT&T-style output format.
     -r        --reanalyze      Force re-analysis of pre-analyzed tokens.
     -1        --first-is-best  Assume 1st analysis is 'best' for each input token.
     -2        --ignore-first   Ignore the first analysis for each input token.
@@ -216,13 +217,24 @@ Default: '-'
 
 =over 4
 
-=item C<--avm> , C<-a>
+=item C<--escapes> , C<-E>
 
-Produce AVM ('vector') output.
+Honor AT&T regex escapes in input.
 
 Default: '0'
 
-Ambiguous-mode only
+Currently only supported by GFSM and GFSMXL.
+
+
+
+
+=item C<--att> , C<-a>
+
+Produce AT&T-style output format.
+
+Default: '1'
+
+Currently only makes a difference for GFSM and GFSMXL.
 
 
 
@@ -432,7 +444,7 @@ package.
 
 =head1 AUTHOR
 
-Bryan Jurish E<lt>moocow@ling.uni-potsdam.deE<gt>
+Bryan Jurish E<lt>jurish@uni-potsdam.deE<gt>
 
 =head1 SEE ALSO
 

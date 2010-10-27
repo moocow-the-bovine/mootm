@@ -2,7 +2,7 @@
 
 /*
    libmootm : moocow's morphology library:
-   Copyright (C) 2003-2008 by Bryan Jurish <moocow@ling.uni-potsdam.de>
+   Copyright (C) 2003-2010 by Bryan Jurish <jurish@uni-potsdam.de>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -115,11 +115,11 @@ namespace mootm {
 
 
   /*------------------------------------------------------------------------*/
-  mootToken& mootFSMgfsm::analyze_token(mootToken &tok, bool want_avm, bool want_warnings)
+  mootToken& mootFSMgfsm::analyze_token(mootToken &tok, bool want_att_escapes, bool want_avm, bool want_warnings)
   {
     //-- get input labels
     if (tlabs) { g_ptr_array_set_size(tlabs,0); }
-    tlabs = gfsm_alphabet_string_to_labels(abet_lo, tok.text().c_str(), tlabs, want_warnings);
+    tlabs = gfsm_alphabet_generic_string_to_labels(abet_lo, tok.text().c_str(), tlabs, want_warnings, want_att_escapes);
 
     //-- lookup
     result = gfsm_automaton_lookup(mfst, tlabs, result);

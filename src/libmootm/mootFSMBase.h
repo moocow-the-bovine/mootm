@@ -79,6 +79,7 @@ namespace mootm {
 
     /** Analyze a single mootToken in-place */
     virtual mootToken& analyze_token(mootToken   &tok,
+				     bool        use_att_escapes=true,
 				     bool        want_avm=true,
 				     bool        want_warnings=true)
     { dummy("analyze_token"); return tok; }
