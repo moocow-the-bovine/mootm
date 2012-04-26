@@ -14,6 +14,7 @@
 ## --- automake options
 #AUTOMAKE_OPTIONS = foreign dist-bzip2
 AUTOMAKE_OPTIONS = foreign
+ACLOCAL_AMFLAGS = -I m4
 
 ## --- recursion subdirectories
 SUBDIRS = config src doc

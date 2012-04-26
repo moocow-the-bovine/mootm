@@ -3,13 +3,14 @@ AC_PREREQ(2.5)
 
 dnl Some handy macros
 define([THE_PACKAGE_NAME],    [mootm])
-define([THE_PACKAGE_VERSION], [2.0.8-2])
-define([THE_PACKAGE_AUTHOR],  [jurish@uni-potsdam.de])
+define([THE_PACKAGE_VERSION], [2.0.9-1])
+define([THE_PACKAGE_AUTHOR],  [jurish@bbaw.de])
 
 AC_INIT(THE_PACKAGE_NAME, THE_PACKAGE_VERSION, THE_PACKAGE_AUTHOR)
 
 dnl source && aux dir
 AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_MACRO_DIR([m4])
 
 dnl canonical target (sets $target, $target_(cpu|vendor|os) : used for bindist)
 AC_CANONICAL_TARGET
@@ -780,7 +781,7 @@ else
   AC_MSG_RESULT(no)
   #mootm_OFLAGS="-O2"
   #mootm_OFLAGS="-O3 -fomit-frame-pointer -funroll-loops -finline-limit-100000"
-  mootm_OFLAGS="-O3 -fomit-frame-pointer -funroll-loops"
+  mootm_OFLAGS="-O3 -fomit-frame-pointer -funroll-loops -Wno-deprecated"
 fi
 AC_SUBST(mootm_OFLAGS)
 

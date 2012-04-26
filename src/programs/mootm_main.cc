@@ -102,6 +102,8 @@ mootMorph morph;
 timeval t1, t2, t3;
 double elapsed_i, elapsed_t;
 
+
+/*-- now defined as moot::VerbosityLevel
 typedef enum {
   vlSilent=0,
   vlErrors=1,
@@ -110,6 +112,7 @@ typedef enum {
   vlWarnings=4,
   vlEverything=5
 } VerbosityLevel;
+*/
 
 /*--------------------------------------------------------------------------
  * Option Processing
@@ -142,7 +145,7 @@ void GetMyOptions(int argc, char **argv)
   churner.use_list = args.list_given;
 
   //-- get initialization start-time
-  if (args.verbose_arg >= vlTiming) gettimeofday(&t1, NULL);
+  if (args.verbose_arg >= vlProgress) gettimeofday(&t1, NULL);
 
   //-- mophology object setup: flags
   morph.eow_str                = args.eow_arg;
@@ -153,7 +156,7 @@ void GetMyOptions(int argc, char **argv)
   morph.ignore_first_analysis  = args.ignore_first_given;
 
   if      (args.verbose_arg <= vlSilent)   morph.verbose = mootMorph::vlSilent;
-  else if (args.verbose_arg <= vlTiming)   morph.verbose = mootMorph::vlErrors;
+  else if (args.verbose_arg <= vlErrors)   morph.verbose = mootMorph::vlErrors;
   else if (args.verbose_arg <= vlWarnings) morph.verbose = mootMorph::vlWarnings;
   else                                     morph.verbose = mootMorph::vlEverything;
 
@@ -203,7 +206,7 @@ int MAIN_C (int argc, char **argv)
   GetMyOptions(argc,argv);
 
   // -- get init-stop time = analysis-start time
-  if (args.verbose_arg >= vlTiming) gettimeofday(&t2, NULL);
+  if (args.verbose_arg >= vlProgress) gettimeofday(&t2, NULL);
 
 
   // -- the guts
@@ -234,7 +237,7 @@ int MAIN_C (int argc, char **argv)
   }
 
   // -- summary
-  if (args.verbose_arg >= vlTiming) {
+  if (args.verbose_arg >= vlProgress) {
       // -- timing
       gettimeofday(&t3, NULL);
 
