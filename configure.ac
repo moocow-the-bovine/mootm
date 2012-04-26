@@ -4,7 +4,7 @@ AC_PREREQ(2.5)
 dnl Some handy macros
 define([THE_PACKAGE_NAME],    [mootm])
 define([THE_PACKAGE_VERSION], [2.0.9-1])
-define([THE_PACKAGE_AUTHOR],  [jurish@bbaw.de])
+define([THE_PACKAGE_AUTHOR],  [moocow@cpan.org])
 
 AC_INIT(THE_PACKAGE_NAME, THE_PACKAGE_VERSION, THE_PACKAGE_AUTHOR)
 

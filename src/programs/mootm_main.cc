@@ -1,6 +1,6 @@
 /*
    mootm  : moocow's part-of-speech tagger : morphology
-   Copyright (C) 2002-2010 by Bryan Jurish <jurish@uni-potsdam.de>
+   Copyright (C) 2002-2010 by Bryan Jurish <moocow@cpan.org>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
 
 /*--------------------------------------------------------------------------
  * File: mootm_main.cc
- * Author: Bryan Jurish <moocow@ling.uni-potsdam.de>
+ * Author: Bryan Jurish <moocow@cpan.org>
  * Description:
  *   + Morphological analyzer moot : main()
  *--------------------------------------------------------------------------*/
@@ -128,7 +128,7 @@ void GetMyOptions(int argc, char **argv)
   //-- show banner
   if (args.verbose_arg >= vlProgress)
     fprintf(stderr,
-	    "%s version %s by Bryan Jurish <jurish@uni-potsdam.de>\n\n",
+	    "%s version %s by Bryan Jurish <moocow@cpan.org>\n\n",
 	    PROGNAME, VERSION);
 
   //-- output file
