@@ -9,6 +9,8 @@ purpose	"Morphological analyzer for moocow's part-of-speech tagger."
 author  "Bryan Jurish <moocow@cpan.org>"
 on_reparse "warn"
 
+podpreamble "=encoding utf8"
+
 #-----------------------------------------------------------------------------
 # Details
 #-----------------------------------------------------------------------------
