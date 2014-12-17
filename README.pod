@@ -1,3 +1,5 @@
+=encoding utf8
+
 =pod
 
 README for package 'mootm'
@@ -119,7 +121,7 @@ MorphConsole, available at ... ?
 This will cease being a comment as soon as
 MorphConsole has matured a bit.
 
-=end comment text
+=end comment
 
 =head1 ACKNOWLEDGEMENTS
 
