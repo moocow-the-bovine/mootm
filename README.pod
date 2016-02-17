@@ -95,9 +95,9 @@ See the file INSTALL in the top-level distribution
 directory for details.
 
 
-=head1 BUILD FROM CVS
+=head1 BUILD FROM CVS/SVN
 
-To build from CVS, you need the GNU utilities
+To build from CVS or Subversion sources, you need the GNU utilities
 aclocal, automake, autoconf, and libtool.  If
 you have these, you can just run the top-level
 script:
