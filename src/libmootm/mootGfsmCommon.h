@@ -2,7 +2,7 @@
 
 /*
    libmootm : moocow's morphology library:
-   Copyright (C) 2003-2008 by Bryan Jurish <moocow@cpan.org>
+   Copyright (C) 2003-2025 by Bryan Jurish <moocow@cpan.org>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -40,10 +40,7 @@
 
 #if defined(USE_FSM_GFSM) || defined(USE_FSM_GFSMXL)
 
-extern "C" {
 #include <gfsm.h>
-}
-
 #include <mootFSMBase.h>
 
 namespace mootm {
